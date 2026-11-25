@@ -1,389 +1,295 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edu Tower Defense</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #1a1a2e; color: #f0e6d0; font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; }
-        .screen { display: none; min-height: 100vh; flex-direction: column; align-items: center; padding: 20px; }
-        .screen.active { display: flex; }
-        #homeScreen { justify-content: center; text-align: center; background: linear-gradient(180deg, #1a1a2e 0%, #0f3460 100%); }
-        #homeScreen h1 { font-size: 46px; color: #e0b15c; margin-bottom: 8px; }
-        .home-towers { margin: 25px 0; height: 100px; position: relative; width: 280px; }
-        .mini-tower { position: absolute; width: 36px; height: 46px; border-radius: 6px; border: 3px solid; }
-        .mini-tower:nth-child(1) { left: 15%; background:#2e7d32; border-color:#a5d6a7; animation: float 3s infinite; }
-        .mini-tower:nth-child(2) { left: 42%; background:#1565c0; border-color:#90caf9; animation: float 3s infinite 0.4s; }
-        .mini-tower:nth-child(3) { left: 69%; background:#e65100; border-color:#ffcc80; animation: float 3s infinite 0.8s; }
-        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-        button { padding: 12px 24px; margin: 6px; background: #c83b2e; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; }
-        button:hover { background: #a83228; }
-        button.secondary { background: transparent; border: 2px solid #e0b15c; color: #e0b15c; }
-        #gameScreen { padding: 8px; }
-        .hud-top { width:100%; max-width:960px; background:#16213e; border:2px solid #e0b15c; border-radius:12px; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-        .hud-stats { display:flex; gap:20px; font-size:15px; }
-        .hud-stats span { color:#e0b15c; font-weight:bold; }
-        canvas { border:3px solid #e0b15c; border-radius:10px; background:#0f3460; }
-        #buildPanel, #buffPanel { display:none; width:100%; max-width:960px; background:#16213e; border:1px solid #e0b15c; border-radius:10px; padding:10px; margin-top:6px; text-align:center; }
-        #buildPanel.active, #buffPanel.active { display:block; }
-        .tower-select button { padding:8px 12px; font-size:14px; margin:3px; }
-        #completeScreen { justify-content:center; text-align:center; }
-        #completeScreen h1 { font-size:40px; color:#e0b15c; }
-        #quizScreen { justify-content:center; }
-        .quiz-box { background:#16213e; border:2px solid #e0b15c; border-radius:14px; padding:25px; max-width:480px; width:100%; text-align:center; }
-        .options button { display:block; width:100%; margin:8px 0; background:#0f3460; border:1px solid #e0b15c; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edu Tower Defense</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#f0e6d0;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh}
+.screen{display:none;min-height:100vh;flex-direction:column;align-items:center;padding:16px}
+.screen.active{display:flex}
+#homeScreen{justify-content:center;text-align:center;background:linear-gradient(180deg,#1a1a2e,#0f3460)}
+#homeScreen h1{font-size:44px;color:#e0b15c;margin-bottom:6px}
+.home-towers{margin:20px auto;height:90px;position:relative;width:260px}
+.mini-tower{position:absolute;width:34px;height:44px;border-radius:6px;border:3px solid}
+.mini-tower:nth-child(1){left:10%;background:#2e7d32;border-color:#a5d6a7;animation:float 3s infinite}
+.mini-tower:nth-child(2){left:40%;background:#1565c0;border-color:#90caf9;animation:float 3s infinite .5s}
+.mini-tower:nth-child(3){left:70%;background:#e65100;border-color:#ffcc80;animation:float 3s infinite 1s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+button{padding:11px 22px;margin:5px;background:#c83b2e;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px}
+button:hover{background:#a83228}
+button.secondary{background:transparent;border:2px solid #e0b15c;color:#e0b15c}
+.hud-top{width:100%;max-width:940px;background:#16213e;border:2px solid #e0b15c;border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.hud-stats{display:flex;gap:18px;font-size:15px}
+.hud-stats b{color:#e0b15c}
+canvas{border:3px solid #e0b15c;border-radius:10px;background:#0f3460}
+#buildPanel,#buffPanel{display:none;width:100%;max-width:940px;background:#16213e;border:1px solid #e0b15c;border-radius:10px;padding:10px;margin-top:6px;text-align:center}
+#buildPanel.active,#buffPanel.active{display:block}
+#completeScreen{justify-content:center;text-align:center}
+#completeScreen h1{font-size:38px;color:#e0b15c}
+#quizScreen{justify-content:center}
+.quiz-box{background:#16213e;border:2px solid #e0b15c;border-radius:14px;padding:22px;max-width:460px;width:100%;text-align:center}
+</style>
 </head>
 <body>
 
 <div id="homeScreen" class="screen active">
-    <h1>Edu Tower Defense</h1>
-    <p>Belajar sambil bertahan</p>
-    <div class="home-towers">
-        <div class="mini-tower"></div>
-        <div class="mini-tower"></div>
-        <div class="mini-tower"></div>
-    </div>
-    <button onclick="startGame()">Mulai Stage <span id="nextStage">1</span></button>
-    <button class="secondary" onclick="openQuizFromHome()">Jawab Soal</button>
+  <h1>Edu Tower Defense</h1>
+  <p style="margin-bottom:10px">Belajar sambil bertahan</p>
+  <div class="home-towers"><div class="mini-tower"></div><div class="mini-tower"></div><div class="mini-tower"></div></div>
+  <button onclick="startGame()">Mulai Stage <span id="nextStage">1</span></button>
+  <button class="secondary" onclick="openQuizFromHome()">Jawab Soal</button>
 </div>
 
 <div id="gameScreen" class="screen">
-    <div class="hud-top">
-        <div class="hud-stats">
-            <div>Stage <span id="stage">1</span></div>
-            <div>Gold <span id="gold">100</span></div>
-            <div>Wave <span id="wave">1</span>/<span id="maxWave">3</span></div>
-            <div>Lives <span id="lives">20</span></div>
-        </div>
-        <div>
-            <button onclick="showTab('build')">Bangun</button>
-            <button onclick="showTab('buff')" id="tabBuff">Buff</button>
-            <button class="secondary" onclick="goHome()">Home</button>
-        </div>
+  <div class="hud-top">
+    <div class="hud-stats">
+      <div>Stage <b id="stage">1</b></div>
+      <div>Gold <b id="gold">100</b></div>
+      <div>Wave <b id="wave">1</b>/<b id="maxWave">3</b></div>
+      <div>Lives <b id="lives">20</b></div>
     </div>
-    <canvas id="gameCanvas" width="900" height="500"></canvas>
-    <div id="buildPanel" class="active">
-        <div class="tower-select">
-            <button onclick="selectTower(0)" id="tw0">Basic 50</button>
-            <button onclick="selectTower(1)" id="tw1">Cepat 60</button>
-            <button onclick="selectTower(2)" id="tw2">Kuat 70</button>
-        </div>
-        <button onclick="startWave()" id="btnStart">Mulai Wave</button>
-        <div id="message" style="margin-top:6px;color:#e0b15c;font-size:14px;">Pilih tower</div>
+    <div>
+      <button onclick="showTab('build')">Bangun</button>
+      <button onclick="showTab('buff')" id="tabBuff">Buff</button>
+      <button class="secondary" onclick="goHome()">Home</button>
     </div>
-    <div id="buffPanel">
-        <div id="buffDisplay">-</div>
-        <button onclick="openQuiz()" id="btnQuiz" style="display:none;">Jawab Soal</button>
-    </div>
+  </div>
+  <canvas id="gameCanvas" width="900" height="500"></canvas>
+  <div id="buildPanel" class="active">
+    <button onclick="selectTower(0)" id="tw0">Basic 50</button>
+    <button onclick="selectTower(1)" id="tw1">Cepat 60</button>
+    <button onclick="selectTower(2)" id="tw2">Kuat 70</button><br>
+    <button onclick="startWave()" id="btnStart" style="margin-top:8px">Mulai Wave</button>
+    <div id="message" style="margin-top:6px;color:#e0b15c;font-size:14px">Pilih tower</div>
+  </div>
+  <div id="buffPanel"><div id="buffDisplay">-</div><button onclick="openQuiz()" id="btnQuiz" style="display:none">Jawab Soal</button></div>
 </div>
 
 <div id="completeScreen" class="screen">
-    <h1>Stage Selesai!</h1>
-    <p id="completeText" style="font-size:20px;margin:15px 0;">Berhasil</p>
-    <button onclick="goHome()">Kembali ke Home</button>
+  <h1>Stage Selesai!</h1>
+  <p id="completeText" style="font-size:18px;margin:12px 0">Berhasil</p>
+  <button onclick="goHome()">Kembali ke Home</button>
 </div>
 
 <div id="quizScreen" class="screen">
-    <div class="quiz-box">
-        <h2 style="color:#e0b15c;margin-bottom:10px;">Soal</h2>
-        <div id="questionText" style="font-size:20px;margin:15px 0;"></div>
-        <div class="options" id="options"></div>
-        <div id="quizResult" style="margin-top:10px;"></div>
-        <button onclick="closeQuiz()">Kembali</button>
-    </div>
+  <div class="quiz-box">
+    <h2 style="color:#e0b15c">Soal</h2>
+    <div id="questionText" style="font-size:18px;margin:12px 0"></div>
+    <div id="options"></div>
+    <div id="quizResult" style="margin:8px 0"></div>
+    <button onclick="closeQuiz()">Kembali</button>
+  </div>
 </div>
 
 <script>
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+const canvas=document.getElementById('gameCanvas');
+const ctx=canvas.getContext('2d');
 
-let stage = 1, gold = 120, wave = 1, lives = 20, maxWave = 3;
-let phase = 'prep';
-let towers = [];
-let monsters = [];
-let buildMode = false;
-let selectedTower = 0;
-let buffUnlocked = false;
-let activeBuffs = [];
-let highestStage = 1;
-let currentPath = [];
-let pathSegments = [];
-let totalPathLength = 0;
+let stage=1, gold=120, wave=1, lives=20, maxWave=3;
+let phase='prep';
+let towers=[];
+let monsters=[];
+let buildMode=false, selectedTower=0;
+let buffUnlocked=false, activeBuffs=[];
+let highestStage=1;
+let currentPath=[], pathSegments=[], totalPathLength=0;
 
-const stagePaths = [
-    [{x:0,y:250},{x:250,y:250},{x:250,y:120},{x:500,y:120},{x:500,y:380},{x:750,y:380},{x:900,y:380}],
-    [{x:0,y:150},{x:200,y:150},{x:200,y:350},{x:450,y:350},{x:450,y:100},{x:700,y:100},{x:700,y:300},{x:900,y:300}],
-    [{x:0,y:400},{x:180,y:400},{x:180,y:180},{x:400,y:180},{x:400,y:400},{x:620,y:400},{x:620,y:150},{x:900,y:150}],
-    [{x:0,y:200},{x:150,y:200},{x:150,y:400},{x:350,y:400},{x:350,y:100},{x:550,y:100},{x:550,y:350},{x:750,y:350},{x:900,y:200}]
+const stagePaths=[
+  [{x:10,y:250},{x:280,y:250},{x:280,y:100},{x:520,y:100},{x:520,y:400},{x:780,y:400},{x:890,y:400}],
+  [{x:10,y:120},{x:220,y:120},{x:220,y:380},{x:480,y:380},{x:480,y:80},{x:720,y:80},{x:720,y:280},{x:890,y:280}],
+  [{x:10,y:420},{x:200,y:420},{x:200,y:160},{x:420,y:160},{x:420,y:420},{x:640,y:420},{x:640,y:140},{x:890,y:140}],
+  [{x:10,y:200},{x:160,y:200},{x:160,y:400},{x:380,y:400},{x:380,y:80},{x:580,y:80},{x:580,y:320},{x:780,y:320},{x:890,y:180}]
 ];
 
-const towerTypes = [
-    {name:'Basic', cost:50, range:115, damage:9, color:'#2e7d32', accent:'#66bb6a'},
-    {name:'Cepat', cost:60, range:105, damage:7, color:'#1565c0', accent:'#42a5f5'},
-    {name:'Kuat', cost:70, range:100, damage:15, color:'#e65100', accent:'#ffa726'}
+const towerTypes=[
+  {name:'Basic',cost:50,range:120,damage:10,color:'#2e7d32',accent:'#81c784'},
+  {name:'Cepat',cost:60,range:110,damage:7,color:'#1565c0',accent:'#64b5f6'},
+  {name:'Kuat',cost:70,range:105,damage:16,color:'#ef6c00',accent:'#ffb74d'}
 ];
 
-function loadPath(s) {
-    const idx = Math.min(s - 1, stagePaths.length - 1);
-    currentPath = stagePaths[idx].map(p => ({...p}));
-    pathSegments = [];
-    totalPathLength = 0;
-    for (let i = 0; i < currentPath.length - 1; i++) {
-        const len = Math.hypot(currentPath[i+1].x - currentPath[i].x, currentPath[i+1].y - currentPath[i].y);
-        pathSegments.push({ start: currentPath[i], end: currentPath[i+1], length: len });
-        totalPathLength += len;
-    }
+function loadPath(s){
+  const idx=Math.min(Math.max(s-1,0), stagePaths.length-1);
+  currentPath=stagePaths[idx].map(p=>({x:p.x,y:p.y}));
+  pathSegments=[]; totalPathLength=0;
+  for(let i=0;i<currentPath.length-1;i++){
+    const len=Math.hypot(currentPath[i+1].x-currentPath[i].x, currentPath[i+1].y-currentPath[i].y);
+    pathSegments.push({start:currentPath[i],end:currentPath[i+1],length:len});
+    totalPathLength+=len;
+  }
 }
 
-function getPos(progress) {
-    let rem = progress;
-    for (const seg of pathSegments) {
-        if (rem <= seg.length) {
-            const t = rem / seg.length;
-            return {
-                x: seg.start.x + (seg.end.x - seg.start.x) * t,
-                y: seg.start.y + (seg.end.y - seg.start.y) * t
-            };
+function getPos(prog){
+  let r=prog;
+  for(const seg of pathSegments){
+    if(r<=seg.length){
+      const t=r/seg.length;
+      return {x:seg.start.x+(seg.end.x-seg.start.x)*t, y:seg.start.y+(seg.end.y-seg.start.y)*t};
+    }
+    r-=seg.length;
+  }
+  return {...currentPath[currentPath.length-1]};
+}
+
+function fullReset(){
+  towers.length=0;
+  monsters.length=0;
+  towers=[];
+  monsters=[];
+  phase='prep';
+  buildMode=false;
+  selectedTower=0;
+  wave=1;
+  gold=100+stage*25;
+  lives=20;
+  maxWave=3;
+  activeBuffs=[];
+  loadPath(stage);
+}
+
+function startGame(){
+  fullReset();
+  showScreen('gameScreen');
+  showTab('build');
+  updateUI();
+  setMessage('Stage '+stage+' - peta baru');
+}
+
+function goHome(){
+  towers=[]; monsters=[];
+  document.getElementById('nextStage').textContent=highestStage;
+  showScreen('homeScreen');
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function showTab(t){
+  document.getElementById('buildPanel').classList.toggle('active',t==='build');
+  document.getElementById('buffPanel').classList.toggle('active',t==='buff');
+}
+function selectTower(i){
+  selectedTower=i; buildMode=true;
+  setMessage('Klik peta: '+towerTypes[i].name);
+  updateUI();
+}
+function updateUI(){
+  document.getElementById('stage').textContent=stage;
+  document.getElementById('gold').textContent=gold;
+  document.getElementById('wave').textContent=wave;
+  document.getElementById('maxWave').textContent=maxWave;
+  document.getElementById('lives').textContent=lives;
+  document.getElementById('btnStart').disabled=phase!=='prep';
+  document.getElementById('tabBuff').style.opacity=buffUnlocked?'1':'0.4';
+  document.getElementById('btnQuiz').style.display=buffUnlocked?'inline-block':'none';
+  towerTypes.forEach((t,i)=>{
+    const b=document.getElementById('tw'+i);
+    b.disabled=gold<t.cost||phase!=='prep';
+    b.style.outline=(buildMode&&selectedTower===i)?'2px solid #e0b15c':'none';
+  });
+  document.getElementById('buffDisplay').textContent=activeBuffs.length?activeBuffs.map(b=>b.name).join(', '):(buffUnlocked?'Kosong':'Stage 3+');
+}
+function setMessage(t){document.getElementById('message').textContent=t}
+
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(!currentPath.length) return;
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.strokeStyle='#13293d'; ctx.lineWidth=44;
+  ctx.beginPath(); ctx.moveTo(currentPath[0].x,currentPath[0].y);
+  for(let i=1;i<currentPath.length;i++) ctx.lineTo(currentPath[i].x,currentPath[i].y);
+  ctx.stroke();
+  ctx.strokeStyle='#e0b15c'; ctx.lineWidth=28; ctx.stroke();
+
+  for(const t of towers){
+    ctx.beginPath(); ctx.arc(t.x,t.y,t.range,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.04)'; ctx.fill();
+    ctx.fillStyle=t.color;
+    ctx.beginPath(); ctx.arc(t.x,t.y,17,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle=t.accent; ctx.lineWidth=3; ctx.stroke();
+  }
+  for(const m of monsters){
+    ctx.fillStyle='#ef5350';
+    ctx.beginPath(); ctx.arc(m.x,m.y,13,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+  }
+}
+
+function loop(){
+  draw();
+  if(phase==='wave'){
+    for(let i=monsters.length-1;i>=0;i--){
+      const m=monsters[i];
+      m.progress+=m.speed;
+      if(m.progress>=totalPathLength){
+        lives--; monsters.splice(i,1); updateUI();
+        if(lives<=0){ setMessage('Gagal'); setTimeout(goHome,800); phase='prep'; return; }
+        continue;
+      }
+      const p=getPos(m.progress); m.x=p.x; m.y=p.y;
+      for(const t of towers){
+        if(Math.hypot(t.x-m.x,t.y-m.y)<=t.range){
+          m.hp-=t.damage*0.03;
+          if(m.hp<=0){ gold+=6; monsters.splice(i,1); updateUI(); break; }
         }
-        rem -= seg.length;
+      }
     }
-    return { ...currentPath[currentPath.length - 1] };
-}
-
-function resetStage() {
-    towers = [];
-    monsters = [];
-    phase = 'prep';
-    buildMode = false;
-    selectedTower = 0;
-    wave = 1;
-    gold = 110 + stage * 20;
-    lives = 20;
-    maxWave = 2 + Math.min(stage, 4);
-    activeBuffs = [];
-    loadPath(stage);
-}
-
-function startGame() {
-    resetStage();
-    showScreen('gameScreen');
-    showTab('build');
-    updateUI();
-    setMessage('Stage ' + stage + ' siap');
-}
-
-function goHome() {
-    document.getElementById('nextStage').textContent = highestStage;
-    showScreen('homeScreen');
-}
-
-function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-}
-
-function showTab(tab) {
-    document.getElementById('buildPanel').classList.toggle('active', tab === 'build');
-    document.getElementById('buffPanel').classList.toggle('active', tab === 'buff');
-}
-
-function selectTower(i) {
-    selectedTower = i;
-    buildMode = true;
-    setMessage('Klik peta untuk ' + towerTypes[i].name);
-    updateUI();
-}
-
-function updateUI() {
-    document.getElementById('stage').textContent = stage;
-    document.getElementById('gold').textContent = gold;
-    document.getElementById('wave').textContent = wave;
-    document.getElementById('maxWave').textContent = maxWave;
-    document.getElementById('lives').textContent = lives;
-    document.getElementById('btnStart').disabled = phase !== 'prep';
-    document.getElementById('tabBuff').style.opacity = buffUnlocked ? '1' : '0.45';
-    document.getElementById('btnQuiz').style.display = buffUnlocked ? 'inline-block' : 'none';
-    towerTypes.forEach((t, i) => {
-        const btn = document.getElementById('tw' + i);
-        btn.disabled = gold < t.cost || phase !== 'prep';
-        btn.style.boxShadow = (buildMode && selectedTower === i) ? '0 0 0 2px #e0b15c' : 'none';
-    });
-    document.getElementById('buffDisplay').innerHTML = activeBuffs.length
-        ? activeBuffs.map(b => b.name).join(' | ')
-        : (buffUnlocked ? 'Belum ada buff' : 'Terbuka di Stage 3');
-}
-
-function setMessage(t) { document.getElementById('message').textContent = t; }
-
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (!currentPath.length) return;
-
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#16324f';
-    ctx.lineWidth = 46;
-    ctx.beginPath();
-    ctx.moveTo(currentPath[0].x, currentPath[0].y);
-    for (let i = 1; i < currentPath.length; i++) ctx.lineTo(currentPath[i].x, currentPath[i].y);
-    ctx.stroke();
-    ctx.strokeStyle = '#e0b15c';
-    ctx.lineWidth = 30;
-    ctx.stroke();
-
-    for (const t of towers) {
-        ctx.beginPath();
-        ctx.arc(t.x, t.y, t.range, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255,255,255,0.05)';
-        ctx.fill();
-        ctx.fillStyle = t.color;
-        ctx.beginPath();
-        ctx.arc(t.x, t.y, 18, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = t.accent;
-        ctx.lineWidth = 3;
-        ctx.stroke();
+    if(monsters.length===0 && phase==='wave'){
+      if(wave>=maxWave){
+        if(stage>=highestStage) highestStage=stage+1;
+        if(stage>=3) buffUnlocked=true;
+        towers=[]; monsters=[];
+        document.getElementById('completeText').textContent='Stage '+stage+' selesai!';
+        showScreen('completeScreen');
+        stage++;
+        return;
+      }else{
+        wave++; phase='prep'; setMessage('Lanjut'); updateUI();
+      }
     }
-
-    for (const m of monsters) {
-        ctx.fillStyle = '#e53935';
-        ctx.beginPath();
-        ctx.arc(m.x, m.y, 14, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-    }
+  }
+  requestAnimationFrame(loop);
 }
 
-function loop() {
-    draw();
-    if (phase === 'wave') {
-        for (let i = monsters.length - 1; i >= 0; i--) {
-            const m = monsters[i];
-            m.progress += m.speed;
-            if (m.progress >= totalPathLength) {
-                lives--;
-                monsters.splice(i, 1);
-                updateUI();
-                if (lives <= 0) {
-                    setMessage('Gagal');
-                    setTimeout(goHome, 1000);
-                    phase = 'prep';
-                    return;
-                }
-                continue;
-            }
-            const pos = getPos(m.progress);
-            m.x = pos.x;
-            m.y = pos.y;
-
-            for (const t of towers) {
-                if (Math.hypot(t.x - m.x, t.y - m.y) <= t.range) {
-                    m.hp -= t.damage * 0.025;
-                    if (m.hp <= 0) {
-                        gold += 8;
-                        monsters.splice(i, 1);
-                        updateUI();
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (monsters.length === 0 && phase === 'wave') {
-            if (wave >= maxWave) {
-                if (stage >= highestStage) highestStage = stage + 1;
-                if (stage >= 3) buffUnlocked = true;
-                document.getElementById('completeText').textContent = 'Stage ' + stage + ' selesai!';
-                showScreen('completeScreen');
-                stage++;
-                return;
-            } else {
-                wave++;
-                phase = 'prep';
-                setMessage('Wave selesai');
-                updateUI();
-            }
-        }
-    }
-    requestAnimationFrame(loop);
+function startWave(){
+  if(phase!=='prep') return;
+  phase='wave'; buildMode=false; monsters=[];
+  const n=6+stage;
+  for(let i=0;i<n;i++){
+    monsters.push({progress:-i*28, speed:1.4+stage*0.05, hp:12+stage*5, x:currentPath[0].x, y:currentPath[0].y});
+  }
+  setMessage('Wave '+wave); updateUI();
 }
 
-function startWave() {
-    if (phase !== 'prep') return;
-    phase = 'wave';
-    buildMode = false;
-    monsters = [];
-    const count = 5 + stage + wave;
-    for (let i = 0; i < count; i++) {
-        monsters.push({
-            progress: -i * 30,
-            speed: 1.3 + stage * 0.08,
-            hp: 15 + stage * 6,
-            x: currentPath[0].x,
-            y: currentPath[0].y
-        });
-    }
-    setMessage('Wave ' + wave);
-    updateUI();
-}
+canvas.onclick=e=>{
+  if(!buildMode||phase!=='prep') return;
+  const t=towerTypes[selectedTower];
+  if(gold<t.cost) return;
+  const r=canvas.getBoundingClientRect();
+  towers.push({x:e.clientX-r.left, y:e.clientY-r.top, range:t.range, damage:t.damage, color:t.color, accent:t.accent});
+  gold-=t.cost; buildMode=false;
+  setMessage('Dibangun'); updateUI();
+};
 
-canvas.addEventListener('click', (e) => {
-    if (!buildMode || phase !== 'prep') return;
-    const type = towerTypes[selectedTower];
-    if (gold < type.cost) return;
-    const rect = canvas.getBoundingClientRect();
-    towers.push({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-        range: type.range,
-        damage: type.damage,
-        color: type.color,
-        accent: type.accent
-    });
-    gold -= type.cost;
-    buildMode = false;
-    setMessage(type.name + ' dibangun');
-    updateUI();
-});
-
-// Quiz sederhana
-const qs = [
-    {q:'5+7=?', o:['11','12','13'], a:1, b:'Gold+30'},
-    {q:'Ibukota Indonesia?', o:['Bandung','Jakarta','Surabaya'], a:1, b:'Damage+'},
-];
-function openQuiz() {
-    if (!buffUnlocked) return;
-    const q = qs[Math.floor(Math.random()*qs.length)];
-    document.getElementById('questionText').textContent = q.q;
-    const opt = document.getElementById('options');
-    opt.innerHTML = '';
-    q.o.forEach((txt,i) => {
-        const b = document.createElement('button');
-        b.textContent = txt;
-        b.onclick = () => {
-            document.getElementById('quizResult').textContent = i===q.a ? 'Benar!' : 'Salah';
-            if (i===q.a) activeBuffs = [{name:q.b}];
-            setTimeout(closeQuiz, 800);
-        };
-        opt.appendChild(b);
-    });
-    showScreen('quizScreen');
+const qs=[{q:'8+5=?',o:['12','13','14'],a:1},{q:'Warna daun?',o:['Merah','Hijau','Biru'],a:1}];
+function openQuiz(){
+  if(!buffUnlocked) return;
+  const q=qs[Math.floor(Math.random()*qs.length)];
+  document.getElementById('questionText').textContent=q.q;
+  const op=document.getElementById('options'); op.innerHTML='';
+  q.o.forEach((t,i)=>{
+    const b=document.createElement('button'); b.textContent=t; b.style.display='block'; b.style.width='100%'; b.style.margin='6px 0';
+    b.onclick=()=>{ document.getElementById('quizResult').textContent=i===q.a?'Benar!':'Salah'; if(i===q.a) activeBuffs=[{name:'Buff'}]; setTimeout(closeQuiz,700); };
+    op.appendChild(b);
+  });
+  showScreen('quizScreen');
 }
-function openQuizFromHome() {
-    if (highestStage < 3) { alert('Lewati Stage 3 dulu'); return; }
-    buffUnlocked = true;
-    openQuiz();
-}
-function closeQuiz() { showScreen('gameScreen'); updateUI(); }
+function openQuizFromHome(){ if(highestStage<3){alert('Stage 3 dulu');return;} buffUnlocked=true; openQuiz(); }
+function closeQuiz(){ showScreen('gameScreen'); updateUI(); }
 
-loadPath(1);
-showTab('build');
-updateUI();
-loop();
+loadPath(1); showTab('build'); updateUI(); loop();
 </script>
 </body>
 </html>
