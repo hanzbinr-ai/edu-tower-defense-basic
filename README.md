@@ -1,32 +1,31 @@
-# Edu Tower Defense - Basic Mechanics Prototype
+# Edu Tower Defense - Basic Prototype
 
-Prototype dasar untuk game tower defense edukasi.
+Prototype game tower defense edukasi (tingkat SD).
 
-## Main Langsung di Browser (GitHub Pages)
-
-1. Buka repository ini di GitHub
-2. Pergi ke **Settings** → **Pages**
-3. Di bagian **Source**, pilih **Deploy from a branch**
-4. Branch: `main`, folder: `/ (root)`
-5. Klik **Save**
-
-Setelah 1-2 menit, game bisa dimainkan langsung di:
+## Main Langsung
+Setelah GitHub Pages diaktifkan:
 
 **https://hanzbinr-ai.github.io/edu-tower-defense-basic/**
 
-## Fitur saat ini
-- Phase-based sederhana (Prep → Wave → Resolve)
-- Build tower dengan klik
-- Wave monster sederhana
-- Gold & Lives system
+## Fitur yang Sudah Ada
+- Tower Defense phase-based (Prep → Wave)
+- Monster mengikuti path dengan benar
+- Build & upgrade sederhana
+- **Halaman Soal terpisah**
+- **Sistem Buff** (terbuka setelah Stage 3)
+- Stage progression
+- Visual tower & monster yang lebih baik
 
-## Cara menjalankan lokal
-Buka file `index.html` langsung di browser.
+## Cara Main
+1. Tempatkan tower di fase persiapan
+2. Mulai wave
+3. Setelah Stage 3, tombol "Jawab Soal" muncul
+4. Jawab soal dengan benar untuk dapat buff (damage, range, gold, dll)
 
-## Rencana selanjutnya
-- Sistem buff dari soal (halaman terpisah)
-- Path yang lebih baik
-- Animasi & visual lebih baik
-- Integrasi soal edukasi
+## Rencana Berikutnya
+- Lebih banyak soal & jenis buff
+- Policy + Skill Aktif yang lebih lengkap
+- Visual & animasi lebih baik
+- Mode Campaign yang lebih panjang
 
-Dibuat sebagai fondasi mekanik dasar.
+Fondasi mekanik dasar sesuai rencana awal.
