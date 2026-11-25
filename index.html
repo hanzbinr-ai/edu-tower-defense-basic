@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edu TD v4</title>
+<title>Edu TD v5</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#1a1a2e;color:#f0e6d0;font-family:system-ui,sans-serif}
@@ -19,17 +19,20 @@ button.sec{background:transparent;border:2px solid #e0b15c;color:#e0b15c}
 .stats b{color:#e0b15c}
 canvas{border:3px solid #e0b15c;border-radius:8px;background:#0f3460}
 .panel{width:100%;max-width:920px;background:#16213e;border:1px solid #e0b15c;border-radius:8px;padding:8px;margin-top:6px;text-align:center}
-#done{justify-content:center;text-align:center}
-#done h1{font-size:36px}
+#done,#quiz{justify-content:center;text-align:center}
+#done h1,#quiz h2{color:#e0b15c}
+.quizbox{background:#16213e;border:2px solid #e0b15c;border-radius:12px;padding:24px;max-width:440px;width:100%}
+.bufftag{display:inline-block;background:#0f3460;border:1px solid #4CAF50;border-radius:6px;padding:4px 10px;margin:4px;font-size:13px}
 </style>
 </head>
 <body>
-<div class="ver">v4</div>
+<div class="ver">v5</div>
 
 <div id="home" class="screen active">
   <h1>Edu Tower Defense</h1>
-  <p style="margin:10px 0 20px">v4</p>
+  <p style="margin:8px 0 16px">v5</p>
   <button onclick="beginStage()">Mulai Stage <span id="ns">1</span></button>
+  <button class="sec" onclick="openQuizHome()" id="qhome" style="display:none">Jawab Soal (Buff)</button>
 </div>
 
 <div id="play" class="screen">
@@ -40,10 +43,14 @@ canvas{border:3px solid #e0b15c;border-radius:8px;background:#0f3460}
       <span>Wave <b id="wv">1</b>/<b id="mw">3</b></span>
       <span>Lives <b id="lv">20</b></span>
     </div>
-    <button class="sec" onclick="goHome()">Home</button>
+    <div>
+      <button onclick="openQuiz()" id="qbtn" style="display:none">Soal</button>
+      <button class="sec" onclick="goHome()">Home</button>
+    </div>
   </div>
   <canvas id="c" width="900" height="500"></canvas>
   <div class="panel">
+    <div id="buffs" style="margin-bottom:6px;font-size:13px"></div>
     <button onclick="pick(0)">Basic 50</button>
     <button onclick="pick(1)">Cepat 60</button>
     <button onclick="pick(2)">Kuat 70</button>
@@ -58,190 +65,137 @@ canvas{border:3px solid #e0b15c;border-radius:8px;background:#0f3460}
   <button onclick="goHome()">Home</button>
 </div>
 
-<script>
-const cvs = document.getElementById('c');
-const ctx = cvs.getContext('2d');
+<div id="quiz" class="screen">
+  <div class="quizbox">
+    <h2>Soal Buff</h2>
+    <p id="qq" style="font-size:18px;margin:16px 0"></p>
+    <div id="qopts"></div>
+    <p id="qres" style="margin:10px 0;min-height:22px"></p>
+    <button onclick="closeQuiz()">Kembali</button>
+  </div>
+</div>
 
-const PATHS = [
+<script>
+const cvs=document.getElementById('c'), ctx=cvs.getContext('2d');
+const PATHS=[
   [{x:30,y:250},{x:320,y:250},{x:320,y:100},{x:560,y:100},{x:560,y:400},{x:860,y:400}],
   [{x:30,y:80},{x:280,y:80},{x:280,y:420},{x:520,y:420},{x:520,y:120},{x:780,y:120},{x:870,y:280}],
   [{x:30,y:420},{x:220,y:420},{x:220,y:120},{x:480,y:120},{x:480,y:420},{x:720,y:420},{x:870,y:180}],
   [{x:30,y:180},{x:200,y:180},{x:200,y:400},{x:420,y:400},{x:420,y:60},{x:640,y:60},{x:640,y:320},{x:870,y:320}]
 ];
-
-const TYPES = [
-  {c:50, r:120, d:11, col:'#2e7d32'},
-  {c:60, r:108, d:8,  col:'#1565c0'},
-  {c:70, r:102, d:17, col:'#e65100'}
+const TYPES=[{c:50,r:120,d:11,col:'#2e7d32'},{c:60,r:108,d:8,col:'#1565c0'},{c:70,r:102,d:17,col:'#e65100'}];
+const QS=[
+  {q:'7+6=?',o:['12','13','14'],a:1,buff:'Damage+'},
+  {q:'Ibukota Indonesia?',o:['Bandung','Jakarta','Medan'],a:1,buff:'Gold+40'},
+  {q:'Hewan yang bisa terbang?',o:['Ikan','Burung','Ular'],a:1,buff:'Range+'},
+  {q:'4x5=?',o:['15','20','25'],a:1,buff:'Slow'}
 ];
 
-let S = {
-  stage:1, high:1, gold:100, wave:1, maxW:3, lives:20,
-  phase:'prep', towers:[], mobs:[], path:[], segs:[], plen:0, building:-1
-};
+let S={stage:1,high:1,gold:100,wave:1,maxW:3,lives:20,phase:'prep',towers:[],mobs:[],path:[],segs:[],plen:0,building:-1,buff:null,buffOn:false};
 
 function setPath(n){
-  const src = PATHS[Math.min(n-1, PATHS.length-1)];
-  S.path = src.map(p=>({x:p.x,y:p.y}));
-  S.segs = []; S.plen = 0;
+  const src=PATHS[Math.min(n-1,PATHS.length-1)];
+  S.path=src.map(p=>({x:p.x,y:p.y}));
+  S.segs=[]; S.plen=0;
   for(let i=0;i<S.path.length-1;i++){
-    const a=S.path[i], b=S.path[i+1];
-    const len=Math.hypot(b.x-a.x,b.y-a.y);
-    S.segs.push({a,b,len});
-    S.plen += len;
+    const a=S.path[i],b=S.path[i+1],len=Math.hypot(b.x-a.x,b.y-a.y);
+    S.segs.push({a,b,len}); S.plen+=len;
   }
 }
-
 function posAt(d){
-  for(const s of S.segs){
-    if(d<=s.len){
-      const t=d/s.len;
-      return {x:s.a.x+(s.b.x-s.a.x)*t, y:s.a.y+(s.b.y-s.a.y)*t};
-    }
-    d -= s.len;
-  }
-  return S.path[S.path.length-1] || {x:0,y:0};
+  for(const s of S.segs){ if(d<=s.len){const t=d/s.len; return {x:s.a.x+(s.b.x-s.a.x)*t,y:s.a.y+(s.b.y-s.a.y)*t};} d-=s.len; }
+  return S.path.at(-1)||{x:0,y:0};
 }
-
 function fresh(n){
-  S.stage = n;
-  S.gold = 70 + n*40;
-  S.wave = 1;
-  S.maxW = 3;
-  S.lives = 20;
-  S.phase = 'prep';
-  S.towers = [];
-  S.mobs = [];
-  S.building = -1;
+  S.stage=n; S.gold=70+n*40; S.wave=1; S.maxW=3; S.lives=20;
+  S.phase='prep'; S.towers=[]; S.mobs=[]; S.building=-1; S.buff=null;
   setPath(n);
 }
-
 function ui(){
-  document.getElementById('st').textContent = S.stage;
-  document.getElementById('gd').textContent = S.gold;
-  document.getElementById('wv').textContent = S.wave;
-  document.getElementById('mw').textContent = S.maxW;
-  document.getElementById('lv').textContent = S.lives;
-  document.getElementById('go').disabled = S.phase !== 'prep';
+  document.getElementById('st').textContent=S.stage;
+  document.getElementById('gd').textContent=S.gold;
+  document.getElementById('wv').textContent=S.wave;
+  document.getElementById('mw').textContent=S.maxW;
+  document.getElementById('lv').textContent=S.lives;
+  document.getElementById('go').disabled=S.phase!=='prep';
+  const showQ=S.buffOn||S.high>=3;
+  document.getElementById('qbtn').style.display=showQ?'inline-block':'none';
+  document.getElementById('qhome').style.display=showQ?'inline-block':'none';
+  document.getElementById('buffs').innerHTML=S.buff?`<span class="bufftag">${S.buff}</span>`:'';
 }
-function msg(t){ document.getElementById('msg').textContent = t; }
-function show(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
+function msg(t){document.getElementById('msg').textContent=t}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 
-function beginStage(){
-  fresh(S.high);
-  show('play');
-  ui();
-  msg('Stage '+S.stage+' bersih');
-}
-function goHome(){
-  S.towers = [];
-  S.mobs = [];
-  S.phase = 'prep';
-  document.getElementById('ns').textContent = S.high;
-  show('home');
-}
-function pick(i){
-  if(S.phase!=='prep') return;
-  if(S.gold < TYPES[i].c){ msg('Gold kurang'); return; }
-  S.building = i;
-  msg('Klik di peta');
-}
+function beginStage(){ fresh(S.high); show('play'); ui(); msg('Stage '+S.stage); }
+function goHome(){ S.towers=[]; S.mobs=[]; S.phase='prep'; document.getElementById('ns').textContent=S.high; show('home'); }
+function pick(i){ if(S.phase!=='prep')return; if(S.gold<TYPES[i].c){msg('Gold kurang');return;} S.building=i; msg('Klik peta'); }
 function launch(){
-  if(S.phase!=='prep') return;
-  S.phase = 'wave';
-  S.building = -1;
-  S.mobs = [];
-  for(let i=0;i<5+S.stage;i++){
-    S.mobs.push({dist:-i*22, spd:1.6, hp:8+S.stage*5});
-  }
-  msg('Wave '+S.wave);
-  ui();
+  if(S.phase!=='prep')return;
+  S.phase='wave'; S.building=-1; S.mobs=[];
+  for(let i=0;i<5+S.stage;i++) S.mobs.push({dist:-i*22,spd:1.6,hp:8+S.stage*5});
+  msg('Wave '+S.wave); ui();
 }
 
-cvs.onclick = e => {
-  if(S.building<0 || S.phase!=='prep') return;
-  const t = TYPES[S.building];
-  if(S.gold < t.c) return;
-  const rc = cvs.getBoundingClientRect();
-  const x = (e.clientX-rc.left)*(cvs.width/rc.width);
-  const y = (e.clientY-rc.top)*(cvs.height/rc.height);
-  S.towers.push({x,y,r:t.r,d:t.d,col:t.col});
-  S.gold -= t.c;
-  S.building = -1;
-  msg('Tower masuk');
-  ui();
+cvs.onclick=e=>{
+  if(S.building<0||S.phase!=='prep')return;
+  const t=TYPES[S.building]; if(S.gold<t.c)return;
+  const rc=cvs.getBoundingClientRect();
+  const x=(e.clientX-rc.left)*(cvs.width/rc.width);
+  const y=(e.clientY-rc.top)*(cvs.height/rc.height);
+  let r=t.r; if(S.buff==='Range+') r+=30;
+  S.towers.push({x,y,r,d:t.d,col:t.col});
+  S.gold-=t.c; S.building=-1; msg('Tower masuk'); ui();
 };
 
 function draw(){
   ctx.clearRect(0,0,cvs.width,cvs.height);
-  if(!S.path.length) return;
-  ctx.lineCap='round'; ctx.lineJoin='round';
-  ctx.strokeStyle='#16324a'; ctx.lineWidth=42;
-  ctx.beginPath();
-  ctx.moveTo(S.path[0].x, S.path[0].y);
-  for(let i=1;i<S.path.length;i++) ctx.lineTo(S.path[i].x, S.path[i].y);
-  ctx.stroke();
-  ctx.strokeStyle='#e0b15c'; ctx.lineWidth=28; ctx.stroke();
-
+  if(!S.path.length)return;
+  ctx.lineCap='round';ctx.lineJoin='round';
+  ctx.strokeStyle='#16324a';ctx.lineWidth=42;
+  ctx.beginPath();ctx.moveTo(S.path[0].x,S.path[0].y);
+  for(let i=1;i<S.path.length;i++)ctx.lineTo(S.path[i].x,S.path[i].y);
+  ctx.stroke(); ctx.strokeStyle='#e0b15c';ctx.lineWidth=28;ctx.stroke();
   for(const t of S.towers){
-    ctx.beginPath(); ctx.arc(t.x,t.y,t.r,0,6.3);
-    ctx.fillStyle='rgba(255,255,255,.05)'; ctx.fill();
-    ctx.fillStyle=t.col;
-    ctx.beginPath(); ctx.arc(t.x,t.y,15,0,6.3); ctx.fill();
-    ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+    ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,6.3);ctx.fillStyle='rgba(255,255,255,.05)';ctx.fill();
+    ctx.fillStyle=t.col;ctx.beginPath();ctx.arc(t.x,t.y,15,0,6.3);ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
   }
   for(const m of S.mobs){
-    if(m.dist<0) continue;
-    const p = posAt(m.dist);
-    ctx.fillStyle='#ef5350';
-    ctx.beginPath(); ctx.arc(p.x,p.y,11,0,6.3); ctx.fill();
+    if(m.dist<0)continue;
+    const p=posAt(m.dist);
+    ctx.fillStyle='#ef5350';ctx.beginPath();ctx.arc(p.x,p.y,11,0,6.3);ctx.fill();
   }
 }
 
 function tick(){
   if(S.phase==='wave'){
+    const slow=S.buff==='Slow'?0.7:1;
     for(let i=S.mobs.length-1;i>=0;i--){
       const m=S.mobs[i];
-      m.dist += m.spd;
-      if(m.dist >= S.plen){
-        S.lives--;
-        S.mobs.splice(i,1);
-        ui();
-        if(S.lives<=0){
-          S.phase='prep';
-          msg('Gagal');
-          setTimeout(goHome,700);
-        }
+      m.dist+=m.spd*slow;
+      if(m.dist>=S.plen){
+        S.lives--; S.mobs.splice(i,1); ui();
+        if(S.lives<=0){ S.phase='prep'; msg('Gagal'); setTimeout(goHome,700); }
         continue;
       }
       const p=posAt(Math.max(0,m.dist));
+      const dmgMul=S.buff==='Damage+'?1.35:1;
       for(const t of S.towers){
         if(Math.hypot(t.x-p.x,t.y-p.y)<t.r){
-          m.hp -= t.d*0.045;
-          if(m.hp<=0){
-            S.gold += 4;
-            S.mobs.splice(i,1);
-            ui();
-            break;
-          }
+          m.hp-=t.d*0.045*dmgMul;
+          if(m.hp<=0){ S.gold+=4; S.mobs.splice(i,1); ui(); break; }
         }
       }
     }
     if(S.mobs.length===0 && S.phase==='wave'){
-      if(S.wave >= S.maxW){
-        if(S.stage >= S.high) S.high = S.stage+1;
-        S.towers=[]; S.mobs=[];
-        S.phase='prep';
+      if(S.wave>=S.maxW){
+        if(S.stage>=S.high) S.high=S.stage+1;
+        if(S.high>=3) S.buffOn=true;
+        S.towers=[]; S.mobs=[]; S.phase='prep';
         document.getElementById('dmsg').textContent='Stage '+S.stage+' selesai';
         show('done');
-      } else {
-        S.wave++;
-        S.phase='prep';
-        msg('Wave selesai');
-        ui();
+      }else{
+        S.wave++; S.phase='prep'; msg('Wave selesai'); ui();
       }
     }
   }
@@ -249,9 +203,36 @@ function tick(){
   requestAnimationFrame(tick);
 }
 
-setPath(1);
-ui();
-tick();
+function openQuiz(){
+  if(!S.buffOn && S.high<3){ alert('Buff terbuka setelah Stage 3'); return; }
+  S.buffOn=true;
+  const q=QS[Math.floor(Math.random()*QS.length)];
+  document.getElementById('qq').textContent=q.q;
+  const box=document.getElementById('qopts'); box.innerHTML='';
+  document.getElementById('qres').textContent='';
+  q.o.forEach((t,i)=>{
+    const b=document.createElement('button');
+    b.textContent=t; b.style.display='block'; b.style.width='100%'; b.style.margin='6px 0';
+    b.onclick=()=>{
+      if(i===q.a){
+        document.getElementById('qres').innerHTML='<span style="color:#4CAF50">Benar! '+q.buff+'</span>';
+        S.buff=q.buff;
+        if(q.buff==='Gold+40') S.gold+=40;
+      }else{
+        document.getElementById('qres').innerHTML='<span style="color:#e74c3c">Salah</span>';
+        S.buff=null;
+      }
+      ui();
+      setTimeout(closeQuiz,900);
+    };
+    box.appendChild(b);
+  });
+  show('quiz');
+}
+function openQuizHome(){ openQuiz(); }
+function closeQuiz(){ show('play'); ui(); }
+
+setPath(1); ui(); tick();
 </script>
 </body>
 </html>
