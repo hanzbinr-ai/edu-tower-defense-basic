@@ -10,36 +10,29 @@
         .screen { display: none; min-height: 100vh; flex-direction: column; align-items: center; padding: 20px; }
         .screen.active { display: flex; }
         #homeScreen { justify-content: center; text-align: center; background: linear-gradient(180deg, #1a1a2e 0%, #0f3460 100%); }
-        #homeScreen h1 { font-size: 48px; color: #e0b15c; margin-bottom: 10px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        #homeScreen p { font-size: 18px; margin-bottom: 30px; opacity: 0.9; }
-        .home-towers { margin: 30px 0; height: 120px; position: relative; width: 300px; }
-        .mini-tower { position: absolute; width: 40px; height: 50px; background: #2e7d32; border-radius: 8px 8px 4px 4px; border: 3px solid #a5d6a7; }
-        .mini-tower:nth-child(1) { left: 20%; animation: float 3s ease-in-out infinite; }
-        .mini-tower:nth-child(2) { left: 45%; animation: float 3s ease-in-out infinite 0.5s; background:#1565c0; border-color:#90caf9; }
-        .mini-tower:nth-child(3) { left: 70%; animation: float 3s ease-in-out infinite 1s; background:#e65100; border-color:#ffcc80; }
-        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-        button { padding: 14px 28px; margin: 8px; background: #c83b2e; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 18px; transition: 0.2s; }
-        button:hover { background: #a83228; transform: translateY(-2px); }
+        #homeScreen h1 { font-size: 46px; color: #e0b15c; margin-bottom: 8px; }
+        .home-towers { margin: 25px 0; height: 100px; position: relative; width: 280px; }
+        .mini-tower { position: absolute; width: 36px; height: 46px; border-radius: 6px; border: 3px solid; }
+        .mini-tower:nth-child(1) { left: 15%; background:#2e7d32; border-color:#a5d6a7; animation: float 3s infinite; }
+        .mini-tower:nth-child(2) { left: 42%; background:#1565c0; border-color:#90caf9; animation: float 3s infinite 0.4s; }
+        .mini-tower:nth-child(3) { left: 69%; background:#e65100; border-color:#ffcc80; animation: float 3s infinite 0.8s; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        button { padding: 12px 24px; margin: 6px; background: #c83b2e; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #a83228; }
         button.secondary { background: transparent; border: 2px solid #e0b15c; color: #e0b15c; }
-        button.secondary:hover { background: #e0b15c; color: #1a1a2e; }
-        #gameScreen { padding: 10px; }
-        .hud-top { width: 100%; max-width: 960px; background: #16213e; border: 2px solid #e0b15c; border-radius: 12px; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .hud-stats { display: flex; gap: 25px; font-size: 16px; }
-        .hud-stats span { color: #e0b15c; font-weight: bold; }
-        .hud-tabs { display: flex; gap: 8px; }
-        .hud-tabs button { padding: 8px 16px; font-size: 14px; margin: 0; }
-        canvas { border: 3px solid #e0b15c; border-radius: 12px; background: #0f3460; }
-        #buffPanel, #buildPanel { display: none; width: 100%; max-width: 960px; background: #16213e; border: 1px solid #e0b15c; border-radius: 10px; padding: 12px; margin-top: 8px; text-align: center; }
-        #buffPanel.active, #buildPanel.active { display: block; }
-        .buff-card { display: inline-block; background: #0f3460; border: 2px solid #4CAF50; border-radius: 8px; padding: 10px 16px; margin: 5px; }
-        #completeScreen { justify-content: center; text-align: center; }
-        #completeScreen h1 { font-size: 42px; color: #e0b15c; margin-bottom: 15px; }
-        #quizScreen { justify-content: center; }
-        .quiz-box { background: #16213e; border: 2px solid #e0b15c; border-radius: 16px; padding: 30px; max-width: 500px; width: 100%; text-align: center; }
-        .question { font-size: 22px; margin: 20px 0 30px; }
-        .options button { display: block; width: 100%; margin: 10px 0; background: #0f3460; border: 1px solid #e0b15c; }
-        .tower-select { margin: 8px 0; }
-        .tower-select button { padding: 8px 14px; font-size: 14px; margin: 4px; }
+        #gameScreen { padding: 8px; }
+        .hud-top { width:100%; max-width:960px; background:#16213e; border:2px solid #e0b15c; border-radius:12px; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+        .hud-stats { display:flex; gap:20px; font-size:15px; }
+        .hud-stats span { color:#e0b15c; font-weight:bold; }
+        canvas { border:3px solid #e0b15c; border-radius:10px; background:#0f3460; }
+        #buildPanel, #buffPanel { display:none; width:100%; max-width:960px; background:#16213e; border:1px solid #e0b15c; border-radius:10px; padding:10px; margin-top:6px; text-align:center; }
+        #buildPanel.active, #buffPanel.active { display:block; }
+        .tower-select button { padding:8px 12px; font-size:14px; margin:3px; }
+        #completeScreen { justify-content:center; text-align:center; }
+        #completeScreen h1 { font-size:40px; color:#e0b15c; }
+        #quizScreen { justify-content:center; }
+        .quiz-box { background:#16213e; border:2px solid #e0b15c; border-radius:14px; padding:25px; max-width:480px; width:100%; text-align:center; }
+        .options button { display:block; width:100%; margin:8px 0; background:#0f3460; border:1px solid #e0b15c; }
     </style>
 </head>
 <body>
@@ -53,19 +46,18 @@
         <div class="mini-tower"></div>
     </div>
     <button onclick="startGame()">Mulai Stage <span id="nextStage">1</span></button>
-    <button class="secondary" onclick="openQuizFromHome()">Jawab Soal (Buff)</button>
-    <p style="margin-top:30px; font-size:14px; opacity:0.7;">Setiap stage punya jalur berbeda</p>
+    <button class="secondary" onclick="openQuizFromHome()">Jawab Soal</button>
 </div>
 
 <div id="gameScreen" class="screen">
     <div class="hud-top">
         <div class="hud-stats">
             <div>Stage <span id="stage">1</span></div>
-            <div>Gold <span id="gold">150</span></div>
+            <div>Gold <span id="gold">100</span></div>
             <div>Wave <span id="wave">1</span>/<span id="maxWave">3</span></div>
             <div>Lives <span id="lives">20</span></div>
         </div>
-        <div class="hud-tabs">
+        <div>
             <button onclick="showTab('build')">Bangun</button>
             <button onclick="showTab('buff')" id="tabBuff">Buff</button>
             <button class="secondary" onclick="goHome()">Home</button>
@@ -74,32 +66,32 @@
     <canvas id="gameCanvas" width="900" height="500"></canvas>
     <div id="buildPanel" class="active">
         <div class="tower-select">
-            <button onclick="selectTower(0)" id="tw0">Basic (50)</button>
-            <button onclick="selectTower(1)" id="tw1">Cepat (60)</button>
-            <button onclick="selectTower(2)" id="tw2">Kuat (70)</button>
+            <button onclick="selectTower(0)" id="tw0">Basic 50</button>
+            <button onclick="selectTower(1)" id="tw1">Cepat 60</button>
+            <button onclick="selectTower(2)" id="tw2">Kuat 70</button>
         </div>
-        <button id="btnStart" onclick="startWave()">Mulai Wave</button>
-        <div id="message" style="margin-top:8px; color:#e0b15c;">Pilih tower lalu klik peta</div>
+        <button onclick="startWave()" id="btnStart">Mulai Wave</button>
+        <div id="message" style="margin-top:6px;color:#e0b15c;font-size:14px;">Pilih tower</div>
     </div>
     <div id="buffPanel">
-        <div id="buffDisplay">Belum ada buff</div>
-        <button onclick="openQuiz()" id="btnQuiz" style="display:none;">Jawab Soal Baru</button>
+        <div id="buffDisplay">-</div>
+        <button onclick="openQuiz()" id="btnQuiz" style="display:none;">Jawab Soal</button>
     </div>
 </div>
 
 <div id="completeScreen" class="screen">
     <h1>Stage Selesai!</h1>
-    <p id="completeText">Kamu berhasil menyelesaikan Stage ini.</p>
+    <p id="completeText" style="font-size:20px;margin:15px 0;">Berhasil</p>
     <button onclick="goHome()">Kembali ke Home</button>
 </div>
 
 <div id="quizScreen" class="screen">
     <div class="quiz-box">
-        <h2 style="color:#e0b15c;">Soal Buff</h2>
-        <div class="question" id="questionText"></div>
+        <h2 style="color:#e0b15c;margin-bottom:10px;">Soal</h2>
+        <div id="questionText" style="font-size:20px;margin:15px 0;"></div>
         <div class="options" id="options"></div>
-        <div id="quizResult"></div>
-        <button onclick="closeQuiz()" style="margin-top:15px;">Kembali</button>
+        <div id="quizResult" style="margin-top:10px;"></div>
+        <button onclick="closeQuiz()">Kembali</button>
     </div>
 </div>
 
@@ -107,82 +99,79 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-let stage = 1, gold = 150, wave = 1, lives = 20, maxWave = 3;
-let phase = 'prep', towers = [], monsters = [], buildMode = false;
+let stage = 1, gold = 120, wave = 1, lives = 20, maxWave = 3;
+let phase = 'prep';
+let towers = [];
+let monsters = [];
+let buildMode = false;
 let selectedTower = 0;
-let buffUnlocked = false, activeBuffs = [];
+let buffUnlocked = false;
+let activeBuffs = [];
 let highestStage = 1;
 let currentPath = [];
-let pathSegments = [], totalPathLength = 0;
+let pathSegments = [];
+let totalPathLength = 0;
 
 const stagePaths = [
-    // Stage 1 - Simple
-    [{x:-20,y:250},{x:200,y:250},{x:200,y:150},{x:450,y:150},{x:450,y:350},{x:700,y:350},{x:920,y:350}],
-    // Stage 2 - More turns
-    [{x:-20,y:180},{x:180,y:180},{x:180,y:320},{x:400,y:320},{x:400,y:120},{x:620,y:120},{x:620,y:380},{x:920,y:380}],
-    // Stage 3 - Zigzag
-    [{x:-20,y:400},{x:150,y:400},{x:150,y:200},{x:350,y:200},{x:350,y:400},{x:550,y:400},{x:550,y:150},{x:750,y:150},{x:920,y:150}],
-    // Stage 4+
-    [{x:-20,y:250},{x:120,y:250},{x:120,y:100},{x:300,y:100},{x:300,y:400},{x:500,y:400},{x:500,y:150},{x:700,y:150},{x:700,y:350},{x:920,y:350}]
+    [{x:0,y:250},{x:250,y:250},{x:250,y:120},{x:500,y:120},{x:500,y:380},{x:750,y:380},{x:900,y:380}],
+    [{x:0,y:150},{x:200,y:150},{x:200,y:350},{x:450,y:350},{x:450,y:100},{x:700,y:100},{x:700,y:300},{x:900,y:300}],
+    [{x:0,y:400},{x:180,y:400},{x:180,y:180},{x:400,y:180},{x:400,y:400},{x:620,y:400},{x:620,y:150},{x:900,y:150}],
+    [{x:0,y:200},{x:150,y:200},{x:150,y:400},{x:350,y:400},{x:350,y:100},{x:550,y:100},{x:550,y:350},{x:750,y:350},{x:900,y:200}]
 ];
 
 const towerTypes = [
-    {name:'Basic', cost:50, range:110, damage:8, color:'#2e7d32', accent:'#4CAF50'},
-    {name:'Cepat', cost:60, range:100, damage:6, color:'#1565c0', accent:'#42a5f5', speed:1.4},
-    {name:'Kuat', cost:70, range:95, damage:14, color:'#e65100', accent:'#ff9800'}
+    {name:'Basic', cost:50, range:115, damage:9, color:'#2e7d32', accent:'#66bb6a'},
+    {name:'Cepat', cost:60, range:105, damage:7, color:'#1565c0', accent:'#42a5f5'},
+    {name:'Kuat', cost:70, range:100, damage:15, color:'#e65100', accent:'#ffa726'}
 ];
 
-function loadPath(stg) {
-    currentPath = stagePaths[Math.min(stg-1, stagePaths.length-1)];
+function loadPath(s) {
+    const idx = Math.min(s - 1, stagePaths.length - 1);
+    currentPath = stagePaths[idx].map(p => ({...p}));
     pathSegments = [];
     totalPathLength = 0;
-    for (let i = 0; i < currentPath.length-1; i++) {
-        let len = Math.hypot(currentPath[i+1].x - currentPath[i].x, currentPath[i+1].y - currentPath[i].y);
-        pathSegments.push({start:currentPath[i], end:currentPath[i+1], length:len});
+    for (let i = 0; i < currentPath.length - 1; i++) {
+        const len = Math.hypot(currentPath[i+1].x - currentPath[i].x, currentPath[i+1].y - currentPath[i].y);
+        pathSegments.push({ start: currentPath[i], end: currentPath[i+1], length: len });
         totalPathLength += len;
     }
 }
 
-function getPos(p) {
-    let r = p;
-    for (let s of pathSegments) {
-        if (r <= s.length) {
-            let t = r / s.length;
-            return {x: s.start.x + (s.end.x-s.start.x)*t, y: s.start.y + (s.end.y-s.start.y)*t};
+function getPos(progress) {
+    let rem = progress;
+    for (const seg of pathSegments) {
+        if (rem <= seg.length) {
+            const t = rem / seg.length;
+            return {
+                x: seg.start.x + (seg.end.x - seg.start.x) * t,
+                y: seg.start.y + (seg.end.y - seg.start.y) * t
+            };
         }
-        r -= s.length;
+        rem -= seg.length;
     }
-    return currentPath[currentPath.length-1];
+    return { ...currentPath[currentPath.length - 1] };
 }
 
-const questions = [
-    {q:"7 + 8 = ?", opts:["14","15","16","13"], ans:1, buff:{name:"Bonus Gold +40", type:"gold", val:40}},
-    {q:"Hewan yang hidup di air?", opts:["Burung","Ikan","Kucing","Ayam"], ans:1, buff:{name:"Damage +30%", type:"damage", val:1.3}},
-    {q:"Planet tempat kita tinggal?", opts:["Mars","Bumi","Venus","Jupiter"], ans:1, buff:{name:"Range +40", type:"range", val:40}},
-    {q:"6 x 7 = ?", opts:["42","36","48","40"], ans:0, buff:{name:"+5 Lives", type:"life", val:5}},
-    {q:"Akar berfungsi untuk?", opts:["Fotosintesis","Menyerap air","Menghasilkan buah","Bernapas"], ans:1, buff:{name:"Monster Lambat", type:"slow", val:0.65}}
-];
-
-function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-}
-
-function startGame() {
-    gold = 130 + stage * 15;
-    lives = 20;
-    wave = 1;
-    maxWave = 2 + Math.min(stage, 3);
+function resetStage() {
     towers = [];
     monsters = [];
     phase = 'prep';
     buildMode = false;
     selectedTower = 0;
+    wave = 1;
+    gold = 110 + stage * 20;
+    lives = 20;
+    maxWave = 2 + Math.min(stage, 4);
+    activeBuffs = [];
     loadPath(stage);
+}
+
+function startGame() {
+    resetStage();
     showScreen('gameScreen');
     showTab('build');
     updateUI();
-    setMessage('Stage ' + stage + ' - Pilih tower & tempatkan');
+    setMessage('Stage ' + stage + ' siap');
 }
 
 function goHome() {
@@ -190,15 +179,20 @@ function goHome() {
     showScreen('homeScreen');
 }
 
-function showTab(tab) {
-    document.getElementById('buildPanel').classList.toggle('active', tab==='build');
-    document.getElementById('buffPanel').classList.toggle('active', tab==='buff');
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
 }
 
-function selectTower(idx) {
-    selectedTower = idx;
+function showTab(tab) {
+    document.getElementById('buildPanel').classList.toggle('active', tab === 'build');
+    document.getElementById('buffPanel').classList.toggle('active', tab === 'buff');
+}
+
+function selectTower(i) {
+    selectedTower = i;
     buildMode = true;
-    setMessage('Klik peta untuk menaruh ' + towerTypes[idx].name);
+    setMessage('Klik peta untuk ' + towerTypes[i].name);
     updateUI();
 }
 
@@ -209,117 +203,109 @@ function updateUI() {
     document.getElementById('maxWave').textContent = maxWave;
     document.getElementById('lives').textContent = lives;
     document.getElementById('btnStart').disabled = phase !== 'prep';
-    document.getElementById('tabBuff').style.opacity = buffUnlocked ? 1 : 0.5;
+    document.getElementById('tabBuff').style.opacity = buffUnlocked ? '1' : '0.45';
     document.getElementById('btnQuiz').style.display = buffUnlocked ? 'inline-block' : 'none';
-    towerTypes.forEach((t,i) => {
-        document.getElementById('tw'+i).disabled = gold < t.cost || phase !== 'prep';
-        document.getElementById('tw'+i).style.outline = (selectedTower===i && buildMode) ? '2px solid #e0b15c' : 'none';
+    towerTypes.forEach((t, i) => {
+        const btn = document.getElementById('tw' + i);
+        btn.disabled = gold < t.cost || phase !== 'prep';
+        btn.style.boxShadow = (buildMode && selectedTower === i) ? '0 0 0 2px #e0b15c' : 'none';
     });
-    const bd = document.getElementById('buffDisplay');
-    bd.innerHTML = activeBuffs.length ? activeBuffs.map(b => `<div class="buff-card">${b.name}</div>`).join('') : (buffUnlocked ? 'Belum ada buff' : 'Buff setelah Stage 3');
+    document.getElementById('buffDisplay').innerHTML = activeBuffs.length
+        ? activeBuffs.map(b => b.name).join(' | ')
+        : (buffUnlocked ? 'Belum ada buff' : 'Terbuka di Stage 3');
 }
 
 function setMessage(t) { document.getElementById('message').textContent = t; }
 
-function openQuiz() { if (!buffUnlocked) return; loadQuestion(); showScreen('quizScreen'); }
-function openQuizFromHome() {
-    if (highestStage < 3) { alert('Selesaikan Stage 3 dulu'); return; }
-    buffUnlocked = true; openQuiz();
-}
-function closeQuiz() { showScreen('gameScreen'); updateUI(); }
-
-let qIndex=0, answered=false;
-function loadQuestion() {
-    qIndex = Math.floor(Math.random()*questions.length);
-    answered = false;
-    const q = questions[qIndex];
-    document.getElementById('questionText').textContent = q.q;
-    const opt = document.getElementById('options');
-    opt.innerHTML = '';
-    q.opts.forEach((o,i)=>{
-        const b=document.createElement('button');
-        b.textContent=o; b.onclick=()=>selectAnswer(i); opt.appendChild(b);
-    });
-    document.getElementById('quizResult').textContent='';
-}
-function selectAnswer(i) {
-    if (answered) return; answered=true;
-    const q=questions[qIndex];
-    const res=document.getElementById('quizResult');
-    if (i===q.ans) {
-        res.innerHTML='<span style="color:#4CAF50">Benar! Buff aktif.</span>';
-        activeBuffs=[q.buff];
-        if (q.buff.type==='gold') gold+=q.buff.val;
-        if (q.buff.type==='life') lives+=q.buff.val;
-    } else {
-        res.innerHTML='<span style="color:#e74c3c">Salah.</span>';
-        activeBuffs=[];
-    }
-    setTimeout(closeQuiz,1200);
-}
-
 function draw() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (!currentPath.length) return;
-    ctx.lineCap='round'; ctx.lineJoin='round';
-    ctx.strokeStyle='#1e3a5f'; ctx.lineWidth=48;
-    ctx.beginPath(); ctx.moveTo(currentPath[0].x, currentPath[0].y);
-    currentPath.slice(1).forEach(p=>ctx.lineTo(p.x,p.y)); ctx.stroke();
-    ctx.strokeStyle='#e0b15c'; ctx.lineWidth=32; ctx.stroke();
 
-    towers.forEach(t => {
-        ctx.beginPath(); ctx.arc(t.x,t.y,t.range,0,Math.PI*2);
-        ctx.fillStyle='rgba(255,255,255,0.06)'; ctx.fill();
-        ctx.fillStyle=t.color;
-        ctx.beginPath(); ctx.arc(t.x,t.y,20,0,Math.PI*2); ctx.fill();
-        ctx.strokeStyle=t.accent; ctx.lineWidth=3; ctx.stroke();
-        ctx.fillStyle=t.accent; ctx.fillRect(t.x-4, t.y-26, 8, 16);
-    });
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#16324f';
+    ctx.lineWidth = 46;
+    ctx.beginPath();
+    ctx.moveTo(currentPath[0].x, currentPath[0].y);
+    for (let i = 1; i < currentPath.length; i++) ctx.lineTo(currentPath[i].x, currentPath[i].y);
+    ctx.stroke();
+    ctx.strokeStyle = '#e0b15c';
+    ctx.lineWidth = 30;
+    ctx.stroke();
 
-    monsters.forEach(m => {
-        ctx.fillStyle='#e74c3c'; ctx.beginPath(); ctx.arc(m.x,m.y,15,0,Math.PI*2); ctx.fill();
-        ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
-        ctx.fillStyle='#333'; ctx.fillRect(m.x-16,m.y-26,32,4);
-        ctx.fillStyle='#2ecc71'; ctx.fillRect(m.x-16,m.y-26,32*(m.hp/m.maxHp),4);
-    });
+    for (const t of towers) {
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, t.range, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.05)';
+        ctx.fill();
+        ctx.fillStyle = t.color;
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = t.accent;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+    }
+
+    for (const m of monsters) {
+        ctx.fillStyle = '#e53935';
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, 14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
 }
 
 function loop() {
     draw();
-    if (phase==='wave') {
-        for (let i=monsters.length-1;i>=0;i--) {
-            let m=monsters[i];
-            let spd = m.speed * (activeBuffs.some(b=>b.type==='slow')?0.65:1);
-            m.progress += spd;
+    if (phase === 'wave') {
+        for (let i = monsters.length - 1; i >= 0; i--) {
+            const m = monsters[i];
+            m.progress += m.speed;
             if (m.progress >= totalPathLength) {
-                lives--; monsters.splice(i,1); updateUI();
-                if (lives<=0) { setMessage('Gagal'); setTimeout(goHome,1200); phase='prep'; return; }
+                lives--;
+                monsters.splice(i, 1);
+                updateUI();
+                if (lives <= 0) {
+                    setMessage('Gagal');
+                    setTimeout(goHome, 1000);
+                    phase = 'prep';
+                    return;
+                }
                 continue;
             }
-            let pos=getPos(m.progress); m.x=pos.x; m.y=pos.y;
-            towers.forEach(t=>{
-                if (Math.hypot(t.x-m.x,t.y-m.y)<=t.range) {
-                    let dmg = t.damage * (activeBuffs.some(b=>b.type==='damage')?1.3:1);
-                    m.hp -= dmg * 0.02;
-                    if (m.hp<=0) { gold+=10; monsters.splice(i,1); updateUI(); }
+            const pos = getPos(m.progress);
+            m.x = pos.x;
+            m.y = pos.y;
+
+            for (const t of towers) {
+                if (Math.hypot(t.x - m.x, t.y - m.y) <= t.range) {
+                    m.hp -= t.damage * 0.025;
+                    if (m.hp <= 0) {
+                        gold += 8;
+                        monsters.splice(i, 1);
+                        updateUI();
+                        break;
+                    }
                 }
-            });
+            }
         }
-        if (monsters.length===0 && phase==='wave') {
-            phase='resolve';
-            gold += 35 + stage*8;
+
+        if (monsters.length === 0 && phase === 'wave') {
             if (wave >= maxWave) {
-                if (stage >= highestStage) highestStage = stage+1;
-                if (stage>=3) buffUnlocked=true;
-                document.getElementById('completeText').textContent = `Stage ${stage} selesai!`;
+                if (stage >= highestStage) highestStage = stage + 1;
+                if (stage >= 3) buffUnlocked = true;
+                document.getElementById('completeText').textContent = 'Stage ' + stage + ' selesai!';
                 showScreen('completeScreen');
-                stage = Math.min(stage+1, 8);
+                stage++;
                 return;
             } else {
                 wave++;
+                phase = 'prep';
                 setMessage('Wave selesai');
                 updateUI();
-                setTimeout(()=>{phase='prep'; setMessage('Persiapan'); updateUI();},1200);
             }
         }
     }
@@ -327,31 +313,72 @@ function loop() {
 }
 
 function startWave() {
-    if (phase!=='prep') return;
-    phase='wave'; buildMode=false; setMessage('Wave '+wave); updateUI();
-    let n = 4 + stage + wave;
-    for (let i=0;i<n;i++) monsters.push({
-        progress:-i*35, speed:1.2+stage*0.1,
-        hp:18+stage*8+wave*3, maxHp:18+stage*8+wave*3,
-        x:currentPath[0].x, y:currentPath[0].y
-    });
+    if (phase !== 'prep') return;
+    phase = 'wave';
+    buildMode = false;
+    monsters = [];
+    const count = 5 + stage + wave;
+    for (let i = 0; i < count; i++) {
+        monsters.push({
+            progress: -i * 30,
+            speed: 1.3 + stage * 0.08,
+            hp: 15 + stage * 6,
+            x: currentPath[0].x,
+            y: currentPath[0].y
+        });
+    }
+    setMessage('Wave ' + wave);
+    updateUI();
 }
 
-canvas.onclick = e => {
-    if (!buildMode || phase!=='prep') return;
-    const t = towerTypes[selectedTower];
-    if (gold < t.cost) return;
-    const r = canvas.getBoundingClientRect();
-    let range = t.range + (activeBuffs.some(b=>b.type==='range')?30:0);
+canvas.addEventListener('click', (e) => {
+    if (!buildMode || phase !== 'prep') return;
+    const type = towerTypes[selectedTower];
+    if (gold < type.cost) return;
+    const rect = canvas.getBoundingClientRect();
     towers.push({
-        x: e.clientX-r.left, y: e.clientY-r.top,
-        range, damage: t.damage, color: t.color, accent: t.accent
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+        range: type.range,
+        damage: type.damage,
+        color: type.color,
+        accent: type.accent
     });
-    gold -= t.cost;
+    gold -= type.cost;
     buildMode = false;
-    setMessage(t.name + ' dibangun');
+    setMessage(type.name + ' dibangun');
     updateUI();
-};
+});
+
+// Quiz sederhana
+const qs = [
+    {q:'5+7=?', o:['11','12','13'], a:1, b:'Gold+30'},
+    {q:'Ibukota Indonesia?', o:['Bandung','Jakarta','Surabaya'], a:1, b:'Damage+'},
+];
+function openQuiz() {
+    if (!buffUnlocked) return;
+    const q = qs[Math.floor(Math.random()*qs.length)];
+    document.getElementById('questionText').textContent = q.q;
+    const opt = document.getElementById('options');
+    opt.innerHTML = '';
+    q.o.forEach((txt,i) => {
+        const b = document.createElement('button');
+        b.textContent = txt;
+        b.onclick = () => {
+            document.getElementById('quizResult').textContent = i===q.a ? 'Benar!' : 'Salah';
+            if (i===q.a) activeBuffs = [{name:q.b}];
+            setTimeout(closeQuiz, 800);
+        };
+        opt.appendChild(b);
+    });
+    showScreen('quizScreen');
+}
+function openQuizFromHome() {
+    if (highestStage < 3) { alert('Lewati Stage 3 dulu'); return; }
+    buffUnlocked = true;
+    openQuiz();
+}
+function closeQuiz() { showScreen('gameScreen'); updateUI(); }
 
 loadPath(1);
 showTab('build');
