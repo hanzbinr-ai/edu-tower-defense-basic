@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Edu TD - Basic Mechanics</title>
+    <style>
+        body { margin: 0; background: #1a1a2e; color: white; font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; }
+        canvas { border: 2px solid #e0b15c; background: #16213e; margin-top: 20px; }
+        #ui { margin: 10px; text-align: center; }
+        button { padding: 10px 20px; margin: 5px; background: #c83b2e; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #a02d22; }
+    </style>
+</head>
+<body>
+    <h1>Edu Tower Defense - Basic Prototype</h1>
+    <div id="ui">
+        <div>Gold: <span id="gold">100</span> | Wave: <span id="wave">1</span> | Lives: <span id="lives">20</span></div>
+        <div>Phase: <span id="phase">Prep</span></div>
+        <button onclick="startWave()">Start Wave</button>
+        <button onclick="buildTower()">Build Tower (50 gold)</button>
+        <p>Klik di canvas untuk menempatkan tower (saat Prep phase)</p>
+    </div>
+    <canvas id="gameCanvas" width="800" height="500"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let gold = 100;
+        let wave = 1;
+        let lives = 20;
+        let phase = 'prep'; // prep, wave, resolve
+        let towers = [];
+        let monsters = [];
+        let path = [
+            {x: 0, y: 250},
+            {x: 200, y: 250},
+            {x: 200, y: 100},
+            {x: 500, y: 100},
+            {x: 500, y: 400},
+            {x: 800, y: 400}
+        ];
+        let selectedBuild = false;
+
+        function updateUI() {
+            document.getElementById('gold').textContent = gold;
+            document.getElementById('wave').textContent = wave;
+            document.getElementById('lives').textContent = lives;
+            document.getElementById('phase').textContent = phase;
+        }
+
+        function drawPath() {
+            ctx.strokeStyle = '#e0b15c';
+            ctx.lineWidth = 40;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(path[0].x, path[0].y);
+            for (let i = 1; i < path.length; i++) {
+                ctx.lineTo(path[i].x, path[i].y);
+            }
+            ctx.stroke();
+        }
+
+        function drawTowers() {
+            towers.forEach(tower => {
+                ctx.fillStyle = '#4CAF50';
+                ctx.beginPath();
+                ctx.arc(tower.x, tower.y, 20, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                // Range
+                ctx.strokeStyle = 'rgba(76, 175, 80, 0.3)';
+                ctx.beginPath();
+                ctx.arc(tower.x, tower.y, 100, 0, Math.PI * 2);
+                ctx.stroke();
+            });
+        }
+
+        function drawMonsters() {
+            monsters.forEach(m => {
+                ctx.fillStyle = '#c83b2e';
+                ctx.beginPath();
+                ctx.arc(m.x, m.y, 15, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPath();
+            drawTowers();
+            drawMonsters();
+
+            if (phase === 'wave') {
+                // Simple monster movement
+                monsters.forEach((m, index) => {
+                    // Very basic path following (simplified)
+                    m.progress += 0.5;
+                    // Approximate position along path (simplified for prototype)
+                    let totalLength = 1200; // rough
+                    let t = m.progress / totalLength;
+                    if (t >= 1) {
+                        lives--;
+                        monsters.splice(index, 1);
+                        updateUI();
+                        if (lives <= 0) {
+                            alert('Game Over!');
+                            phase = 'prep';
+                        }
+                    } else {
+                        // Simple interpolation for demo
+                        m.x = 50 + m.progress * 0.6;
+                        m.y = 250 + Math.sin(m.progress * 0.01) * 50;
+                    }
+                });
+
+                // Tower shooting (very basic)
+                towers.forEach(tower => {
+                    monsters.forEach((m, mi) => {
+                        let dx = tower.x - m.x;
+                        let dy = tower.y - m.y;
+                        let dist = Math.sqrt(dx*dx + dy*dy);
+                        if (dist < 100) {
+                            m.hp -= 1;
+                            if (m.hp <= 0) {
+                                gold += 10;
+                                monsters.splice(mi, 1);
+                                updateUI();
+                            }
+                        }
+                    });
+                });
+
+                if (monsters.length === 0 && phase === 'wave') {
+                    phase = 'resolve';
+                    gold += 50;
+                    wave++;
+                    updateUI();
+                    setTimeout(() => { phase = 'prep'; updateUI(); }, 2000);
+                }
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startWave() {
+            if (phase !== 'prep') return;
+            phase = 'wave';
+            // Spawn monsters
+            for (let i = 0; i < 5 + wave; i++) {
+                monsters.push({
+                    x: 0,
+                    y: 250,
+                    progress: i * -30,
+                    hp: 10 + wave * 2
+                });
+            }
+            updateUI();
+        }
+
+        function buildTower() {
+            if (gold >= 50 && phase === 'prep') {
+                selectedBuild = true;
+                alert('Klik di canvas untuk menempatkan tower');
+            } else {
+                alert('Gold tidak cukup atau bukan fase Prep');
+            }
+        }
+
+        canvas.addEventListener('click', (e) => {
+            if (!selectedBuild || phase !== 'prep') return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            towers.push({x, y});
+            gold -= 50;
+            selectedBuild = false;
+            updateUI();
+        });
+
+        updateUI();
+        gameLoop();
+    </script>
+</body>
+</html>
