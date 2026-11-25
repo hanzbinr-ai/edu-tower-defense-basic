@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edu TD v3</title>
+<title>Edu TD v4</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#1a1a2e;color:#f0e6d0;font-family:system-ui,sans-serif}
@@ -11,7 +11,7 @@ body{background:#1a1a2e;color:#f0e6d0;font-family:system-ui,sans-serif}
 .screen.active{display:flex}
 #home{justify-content:center;text-align:center;background:linear-gradient(#1a1a2e,#0f3460)}
 h1{color:#e0b15c;font-size:42px;margin-bottom:8px}
-.ver{position:fixed;bottom:8px;right:12px;font-size:12px;opacity:.6}
+.ver{position:fixed;bottom:8px;right:12px;font-size:12px;opacity:.5}
 button{padding:10px 20px;margin:5px;background:#c83b2e;color:#fff;border:0;border-radius:8px;cursor:pointer;font-size:15px}
 button.sec{background:transparent;border:2px solid #e0b15c;color:#e0b15c}
 .hud{width:100%;max-width:920px;background:#16213e;border:2px solid #e0b15c;border-radius:10px;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
@@ -24,11 +24,11 @@ canvas{border:3px solid #e0b15c;border-radius:8px;background:#0f3460}
 </style>
 </head>
 <body>
-<div class="ver">v3</div>
+<div class="ver">v4</div>
 
 <div id="home" class="screen active">
   <h1>Edu Tower Defense</h1>
-  <p style="margin:10px 0 20px">v3 - Stage terpisah</p>
+  <p style="margin:10px 0 20px">v4</p>
   <button onclick="beginStage()">Mulai Stage <span id="ns">1</span></button>
 </div>
 
@@ -40,9 +40,7 @@ canvas{border:3px solid #e0b15c;border-radius:8px;background:#0f3460}
       <span>Wave <b id="wv">1</b>/<b id="mw">3</b></span>
       <span>Lives <b id="lv">20</b></span>
     </div>
-    <div>
-      <button class="sec" onclick="goHome()">Home</button>
-    </div>
+    <button class="sec" onclick="goHome()">Home</button>
   </div>
   <canvas id="c" width="900" height="500"></canvas>
   <div class="panel">
@@ -65,62 +63,49 @@ const cvs = document.getElementById('c');
 const ctx = cvs.getContext('2d');
 
 const PATHS = [
-  [{x:20,y:250},{x:300,y:250},{x:300,y:120},{x:550,y:120},{x:550,y:380},{x:850,y:380}],
-  [{x:20,y:100},{x:250,y:100},{x:250,y:400},{x:500,y:400},{x:500,y:150},{x:750,y:150},{x:880,y:250}],
-  [{x:20,y:400},{x:200,y:400},{x:200,y:150},{x:450,y:150},{x:450,y:400},{x:700,y:400},{x:880,y:200}],
-  [{x:20,y:200},{x:180,y:200},{x:180,y:380},{x:400,y:380},{x:400,y:80},{x:620,y:80},{x:620,y:300},{x:880,y:300}]
+  [{x:30,y:250},{x:320,y:250},{x:320,y:100},{x:560,y:100},{x:560,y:400},{x:860,y:400}],
+  [{x:30,y:80},{x:280,y:80},{x:280,y:420},{x:520,y:420},{x:520,y:120},{x:780,y:120},{x:870,y:280}],
+  [{x:30,y:420},{x:220,y:420},{x:220,y:120},{x:480,y:120},{x:480,y:420},{x:720,y:420},{x:870,y:180}],
+  [{x:30,y:180},{x:200,y:180},{x:200,y:400},{x:420,y:400},{x:420,y:60},{x:640,y:60},{x:640,y:320},{x:870,y:320}]
 ];
 
 const TYPES = [
-  {c:50, r:115, d:10, col:'#2e7d32'},
-  {c:60, r:105, d:7,  col:'#1565c0'},
-  {c:70, r:100, d:16, col:'#e65100'}
+  {c:50, r:120, d:11, col:'#2e7d32'},
+  {c:60, r:108, d:8,  col:'#1565c0'},
+  {c:70, r:102, d:17, col:'#e65100'}
 ];
 
 let S = {
-  stage: 1,
-  high: 1,
-  gold: 100,
-  wave: 1,
-  maxW: 3,
-  lives: 20,
-  phase: 'prep',
-  towers: [],
-  mobs: [],
-  path: [],
-  segs: [],
-  plen: 0,
-  building: -1
+  stage:1, high:1, gold:100, wave:1, maxW:3, lives:20,
+  phase:'prep', towers:[], mobs:[], path:[], segs:[], plen:0, building:-1
 };
 
-function setPath(n) {
-  const p = PATHS[Math.min(n-1, PATHS.length-1)];
-  S.path = p.map(pt => ({x:pt.x, y:pt.y}));
-  S.segs = [];
-  S.plen = 0;
-  for (let i = 0; i < S.path.length-1; i++) {
-    const a = S.path[i], b = S.path[i+1];
-    const len = Math.hypot(b.x-a.x, b.y-a.y);
-    S.segs.push({a, b, len});
+function setPath(n){
+  const src = PATHS[Math.min(n-1, PATHS.length-1)];
+  S.path = src.map(p=>({x:p.x,y:p.y}));
+  S.segs = []; S.plen = 0;
+  for(let i=0;i<S.path.length-1;i++){
+    const a=S.path[i], b=S.path[i+1];
+    const len=Math.hypot(b.x-a.x,b.y-a.y);
+    S.segs.push({a,b,len});
     S.plen += len;
   }
 }
 
-function posAt(dist) {
-  let d = dist;
-  for (const s of S.segs) {
-    if (d <= s.len) {
-      const t = d / s.len;
-      return {x: s.a.x + (s.b.x-s.a.x)*t, y: s.a.y + (s.b.y-s.a.y)*t};
+function posAt(d){
+  for(const s of S.segs){
+    if(d<=s.len){
+      const t=d/s.len;
+      return {x:s.a.x+(s.b.x-s.a.x)*t, y:s.a.y+(s.b.y-s.a.y)*t};
     }
     d -= s.len;
   }
-  return S.path[S.path.length-1];
+  return S.path[S.path.length-1] || {x:0,y:0};
 }
 
-function fresh(n) {
+function fresh(n){
   S.stage = n;
-  S.gold = 80 + n * 35;
+  S.gold = 70 + n*40;
   S.wave = 1;
   S.maxW = 3;
   S.lives = 20;
@@ -131,7 +116,7 @@ function fresh(n) {
   setPath(n);
 }
 
-function ui() {
+function ui(){
   document.getElementById('st').textContent = S.stage;
   document.getElementById('gd').textContent = S.gold;
   document.getElementById('wv').textContent = S.wave;
@@ -139,145 +124,125 @@ function ui() {
   document.getElementById('lv').textContent = S.lives;
   document.getElementById('go').disabled = S.phase !== 'prep';
 }
-
-function msg(t) { document.getElementById('msg').textContent = t; }
-
-function show(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+function msg(t){ document.getElementById('msg').textContent = t; }
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-function beginStage() {
+function beginStage(){
   fresh(S.high);
   show('play');
   ui();
-  msg('Stage ' + S.stage + ' dimulai (bersih)');
+  msg('Stage '+S.stage+' bersih');
 }
-
-function goHome() {
+function goHome(){
   S.towers = [];
   S.mobs = [];
+  S.phase = 'prep';
   document.getElementById('ns').textContent = S.high;
   show('home');
 }
-
-function pick(i) {
-  if (S.phase !== 'prep') return;
-  if (S.gold < TYPES[i].c) { msg('Gold kurang'); return; }
+function pick(i){
+  if(S.phase!=='prep') return;
+  if(S.gold < TYPES[i].c){ msg('Gold kurang'); return; }
   S.building = i;
-  msg('Klik peta untuk taruh tower');
+  msg('Klik di peta');
 }
-
-function launch() {
-  if (S.phase !== 'prep') return;
+function launch(){
+  if(S.phase!=='prep') return;
   S.phase = 'wave';
   S.building = -1;
   S.mobs = [];
-  const n = 5 + S.stage;
-  for (let i = 0; i < n; i++) {
-    S.mobs.push({dist: -i*25, spd: 1.5, hp: 10+S.stage*4});
+  for(let i=0;i<5+S.stage;i++){
+    S.mobs.push({dist:-i*22, spd:1.6, hp:8+S.stage*5});
   }
-  msg('Wave ' + S.wave);
+  msg('Wave '+S.wave);
   ui();
 }
 
-cvs.addEventListener('click', e => {
-  if (S.building < 0 || S.phase !== 'prep') return;
+cvs.onclick = e => {
+  if(S.building<0 || S.phase!=='prep') return;
   const t = TYPES[S.building];
-  if (S.gold < t.c) return;
+  if(S.gold < t.c) return;
   const rc = cvs.getBoundingClientRect();
-  const x = (e.clientX - rc.left) * (cvs.width / rc.width);
-  const y = (e.clientY - rc.top) * (cvs.height / rc.height);
-  S.towers.push({x, y, r: t.r, d: t.d, col: t.col});
+  const x = (e.clientX-rc.left)*(cvs.width/rc.width);
+  const y = (e.clientY-rc.top)*(cvs.height/rc.height);
+  S.towers.push({x,y,r:t.r,d:t.d,col:t.col});
   S.gold -= t.c;
   S.building = -1;
-  msg('Tower ditaruh');
+  msg('Tower masuk');
   ui();
-});
+};
 
-function draw() {
-  ctx.clearRect(0, 0, cvs.width, cvs.height);
-  if (!S.path.length) return;
-
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  ctx.strokeStyle = '#1a3a5c';
-  ctx.lineWidth = 40;
+function draw(){
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  if(!S.path.length) return;
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.strokeStyle='#16324a'; ctx.lineWidth=42;
   ctx.beginPath();
   ctx.moveTo(S.path[0].x, S.path[0].y);
-  for (let i = 1; i < S.path.length; i++) ctx.lineTo(S.path[i].x, S.path[i].y);
+  for(let i=1;i<S.path.length;i++) ctx.lineTo(S.path[i].x, S.path[i].y);
   ctx.stroke();
-  ctx.strokeStyle = '#d4a84b';
-  ctx.lineWidth = 26;
-  ctx.stroke();
+  ctx.strokeStyle='#e0b15c'; ctx.lineWidth=28; ctx.stroke();
 
-  for (const t of S.towers) {
-    ctx.beginPath();
-    ctx.arc(t.x, t.y, t.r, 0, 6.28);
-    ctx.fillStyle = 'rgba(255,255,255,.06)';
-    ctx.fill();
-    ctx.fillStyle = t.col;
-    ctx.beginPath();
-    ctx.arc(t.x, t.y, 16, 0, 6.28);
-    ctx.fill();
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+  for(const t of S.towers){
+    ctx.beginPath(); ctx.arc(t.x,t.y,t.r,0,6.3);
+    ctx.fillStyle='rgba(255,255,255,.05)'; ctx.fill();
+    ctx.fillStyle=t.col;
+    ctx.beginPath(); ctx.arc(t.x,t.y,15,0,6.3); ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
   }
-
-  for (const m of S.mobs) {
-    if (m.dist < 0) continue;
+  for(const m of S.mobs){
+    if(m.dist<0) continue;
     const p = posAt(m.dist);
-    ctx.fillStyle = '#e53935';
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 12, 0, 6.28);
-    ctx.fill();
+    ctx.fillStyle='#ef5350';
+    ctx.beginPath(); ctx.arc(p.x,p.y,11,0,6.3); ctx.fill();
   }
 }
 
-function tick() {
-  if (S.phase === 'wave') {
-    for (let i = S.mobs.length-1; i >= 0; i--) {
-      const m = S.mobs[i];
+function tick(){
+  if(S.phase==='wave'){
+    for(let i=S.mobs.length-1;i>=0;i--){
+      const m=S.mobs[i];
       m.dist += m.spd;
-      if (m.dist >= S.plen) {
+      if(m.dist >= S.plen){
         S.lives--;
-        S.mobs.splice(i, 1);
+        S.mobs.splice(i,1);
         ui();
-        if (S.lives <= 0) {
+        if(S.lives<=0){
+          S.phase='prep';
           msg('Gagal');
-          setTimeout(goHome, 600);
-          S.phase = 'prep';
-          return;
+          setTimeout(goHome,700);
         }
         continue;
       }
-      const p = posAt(Math.max(0, m.dist));
-      for (const t of S.towers) {
-        if (Math.hypot(t.x-p.x, t.y-p.y) < t.r) {
-          m.hp -= t.d * 0.04;
-          if (m.hp <= 0) {
-            S.gold += 5;
-            S.mobs.splice(i, 1);
+      const p=posAt(Math.max(0,m.dist));
+      for(const t of S.towers){
+        if(Math.hypot(t.x-p.x,t.y-p.y)<t.r){
+          m.hp -= t.d*0.045;
+          if(m.hp<=0){
+            S.gold += 4;
+            S.mobs.splice(i,1);
             ui();
             break;
           }
         }
       }
     }
-    if (S.mobs.length === 0 && S.phase === 'wave') {
-      if (S.wave >= S.maxW) {
-        if (S.stage >= S.high) S.high = S.stage + 1;
-        S.towers = [];
-        S.mobs = [];
-        document.getElementById('dmsg').textContent = 'Stage ' + S.stage + ' beres';
+    if(S.mobs.length===0 && S.phase==='wave'){
+      if(S.wave >= S.maxW){
+        if(S.stage >= S.high) S.high = S.stage+1;
+        S.towers=[]; S.mobs=[];
+        S.phase='prep';
+        document.getElementById('dmsg').textContent='Stage '+S.stage+' selesai';
         show('done');
-        return;
+      } else {
+        S.wave++;
+        S.phase='prep';
+        msg('Wave selesai');
+        ui();
       }
-      S.wave++;
-      S.phase = 'prep';
-      msg('Wave selesai');
-      ui();
     }
   }
   draw();
