@@ -3,36 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edu TD v5</title>
+<title>Edu TD v6</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#1a1a2e;color:#f0e6d0;font-family:system-ui,sans-serif}
 .screen{display:none;min-height:100vh;flex-direction:column;align-items:center;padding:12px}
 .screen.active{display:flex}
 #home{justify-content:center;text-align:center;background:linear-gradient(#1a1a2e,#0f3460)}
-h1{color:#e0b15c;font-size:42px;margin-bottom:8px}
-.ver{position:fixed;bottom:8px;right:12px;font-size:12px;opacity:.5}
-button{padding:10px 20px;margin:5px;background:#c83b2e;color:#fff;border:0;border-radius:8px;cursor:pointer;font-size:15px}
+h1{color:#e0b15c;font-size:40px}
+.ver{position:fixed;bottom:6px;right:10px;font-size:11px;opacity:.5}
+button{padding:10px 18px;margin:4px;background:#c83b2e;color:#fff;border:0;border-radius:8px;cursor:pointer;font-size:14px}
 button.sec{background:transparent;border:2px solid #e0b15c;color:#e0b15c}
-.hud{width:100%;max-width:920px;background:#16213e;border:2px solid #e0b15c;border-radius:10px;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.stats{display:flex;gap:16px;font-size:15px}
-.stats b{color:#e0b15c}
+.hud{width:100%;max-width:920px;background:#16213e;border:2px solid #e0b15c;border-radius:10px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.stats{display:flex;gap:14px;font-size:14px}.stats b{color:#e0b15c}
 canvas{border:3px solid #e0b15c;border-radius:8px;background:#0f3460}
 .panel{width:100%;max-width:920px;background:#16213e;border:1px solid #e0b15c;border-radius:8px;padding:8px;margin-top:6px;text-align:center}
-#done,#quiz{justify-content:center;text-align:center}
-#done h1,#quiz h2{color:#e0b15c}
-.quizbox{background:#16213e;border:2px solid #e0b15c;border-radius:12px;padding:24px;max-width:440px;width:100%}
-.bufftag{display:inline-block;background:#0f3460;border:1px solid #4CAF50;border-radius:6px;padding:4px 10px;margin:4px;font-size:13px}
+.card{display:inline-block;background:#0f3460;border:2px solid #e0b15c;border-radius:8px;padding:8px 12px;margin:4px;font-size:13px;min-width:90px}
+.card.on{border-color:#4CAF50;background:#1b3a2a}
+.card.policy{border-color:#42a5f5}
+#prep,#quiz,#done{justify-content:center;text-align:center}
+.box{background:#16213e;border:2px solid #e0b15c;border-radius:12px;padding:20px;max-width:520px;width:100%}
 </style>
 </head>
 <body>
-<div class="ver">v5</div>
+<div class="ver">v6</div>
 
 <div id="home" class="screen active">
   <h1>Edu Tower Defense</h1>
-  <p style="margin:8px 0 16px">v5</p>
+  <p style="margin:6px 0 14px;opacity:.8">v6</p>
   <button onclick="beginStage()">Mulai Stage <span id="ns">1</span></button>
-  <button class="sec" onclick="openQuizHome()" id="qhome" style="display:none">Jawab Soal (Buff)</button>
+  <button class="sec" onclick="openPrep()" id="prepBtn" style="display:none">Siapkan Buff</button>
+  <div id="homeBuff" style="margin-top:12px;font-size:13px"></div>
+</div>
+
+<div id="prep" class="screen">
+  <div class="box">
+    <h2 style="color:#e0b15c;margin-bottom:8px">Siapkan Buff</h2>
+    <p style="font-size:13px;margin-bottom:10px">Jawab soal untuk mengisi slot (3 Policy + 3 Aktif)</p>
+    <div style="margin:8px 0"><b>Policy (Pasif)</b><br><span id="polSlots"></span></div>
+    <div style="margin:8px 0"><b>Skill Aktif</b><br><span id="actSlots"></span></div>
+    <button onclick="doQuiz('policy')">Jawab → Policy</button>
+    <button onclick="doQuiz('active')">Jawab → Aktif</button>
+    <button class="sec" onclick="clearBuffs()">Reset</button>
+    <br><button onclick="show('home')" style="margin-top:10px">Kembali</button>
+  </div>
+</div>
+
+<div id="quiz" class="screen">
+  <div class="box">
+    <h2 style="color:#e0b15c">Soal</h2>
+    <p id="qq" style="font-size:18px;margin:14px 0"></p>
+    <div id="qopts"></div>
+    <p id="qres" style="margin:8px 0;min-height:20px"></p>
+  </div>
 </div>
 
 <div id="play" class="screen">
@@ -43,73 +66,59 @@ canvas{border:3px solid #e0b15c;border-radius:8px;background:#0f3460}
       <span>Wave <b id="wv">1</b>/<b id="mw">3</b></span>
       <span>Lives <b id="lv">20</b></span>
     </div>
-    <div>
-      <button onclick="openQuiz()" id="qbtn" style="display:none">Soal</button>
-      <button class="sec" onclick="goHome()">Home</button>
-    </div>
+    <button class="sec" onclick="goHome()">Home</button>
   </div>
   <canvas id="c" width="900" height="500"></canvas>
   <div class="panel">
-    <div id="buffs" style="margin-bottom:6px;font-size:13px"></div>
+    <div id="activeBar" style="margin-bottom:6px"></div>
     <button onclick="pick(0)">Basic 50</button>
     <button onclick="pick(1)">Cepat 60</button>
     <button onclick="pick(2)">Kuat 70</button>
     <button onclick="launch()" id="go">Mulai Wave</button>
-    <div id="msg" style="margin-top:6px;color:#e0b15c;font-size:14px"></div>
+    <div id="msg" style="margin-top:4px;color:#e0b15c;font-size:13px"></div>
   </div>
 </div>
 
 <div id="done" class="screen">
-  <h1>Stage Selesai</h1>
-  <p id="dmsg" style="margin:12px 0;font-size:18px"></p>
+  <h1 style="color:#e0b15c">Stage Selesai</h1>
+  <p id="dmsg" style="margin:10px 0"></p>
   <button onclick="goHome()">Home</button>
 </div>
 
-<div id="quiz" class="screen">
-  <div class="quizbox">
-    <h2>Soal Buff</h2>
-    <p id="qq" style="font-size:18px;margin:16px 0"></p>
-    <div id="qopts"></div>
-    <p id="qres" style="margin:10px 0;min-height:22px"></p>
-    <button onclick="closeQuiz()">Kembali</button>
-  </div>
-</div>
-
 <script>
-const cvs=document.getElementById('c'), ctx=cvs.getContext('2d');
+const cvs=document.getElementById('c'),ctx=cvs.getContext('2d');
 const PATHS=[
-  [{x:30,y:250},{x:320,y:250},{x:320,y:100},{x:560,y:100},{x:560,y:400},{x:860,y:400}],
-  [{x:30,y:80},{x:280,y:80},{x:280,y:420},{x:520,y:420},{x:520,y:120},{x:780,y:120},{x:870,y:280}],
-  [{x:30,y:420},{x:220,y:420},{x:220,y:120},{x:480,y:120},{x:480,y:420},{x:720,y:420},{x:870,y:180}],
-  [{x:30,y:180},{x:200,y:180},{x:200,y:400},{x:420,y:400},{x:420,y:60},{x:640,y:60},{x:640,y:320},{x:870,y:320}]
+[{x:40,y:250},{x:300,y:250},{x:300,y:90},{x:540,y:90},{x:540,y:410},{x:860,y:410}],
+[{x:40,y:70},{x:260,y:70},{x:260,y:430},{x:500,y:430},{x:500,y:110},{x:760,y:110},{x:860,y:270}],
+[{x:40,y:430},{x:200,y:430},{x:200,y:100},{x:460,y:100},{x:460,y:430},{x:700,y:430},{x:860,y:160}],
+[{x:40,y:160},{x:180,y:160},{x:180,y:400},{x:400,y:400},{x:400,y:50},{x:620,y:50},{x:620,y:300},{x:860,y:300}]
 ];
-const TYPES=[{c:50,r:120,d:11,col:'#2e7d32'},{c:60,r:108,d:8,col:'#1565c0'},{c:70,r:102,d:17,col:'#e65100'}];
-const QS=[
-  {q:'7+6=?',o:['12','13','14'],a:1,buff:'Damage+'},
-  {q:'Ibukota Indonesia?',o:['Bandung','Jakarta','Medan'],a:1,buff:'Gold+40'},
-  {q:'Hewan yang bisa terbang?',o:['Ikan','Burung','Ular'],a:1,buff:'Range+'},
-  {q:'4x5=?',o:['15','20','25'],a:1,buff:'Slow'}
-];
+const TYPES=[{c:50,r:118,d:10,col:'#2e7d32'},{c:60,r:105,d:7,col:'#1565c0'},{c:70,r:100,d:16,col:'#e65100'}];
+const POLICY=['Damage+15%','Range+25','Slow 20%','Gold+'];
+const ACTIVE=['Burst Damage','Heal Lives','Extra Gold','Knockback'];
+const QS=[{q:'8+7=?',o:['14','15','16'],a:1},{q:'Planet kita?',o:['Mars','Bumi','Venus'],a:1},{q:'2x9=?',o:['16','18','20'],a:1},{q:'Akar menyerap?',o:['Cahaya','Air','Udara'],a:1}];
 
-let S={stage:1,high:1,gold:100,wave:1,maxW:3,lives:20,phase:'prep',towers:[],mobs:[],path:[],segs:[],plen:0,building:-1,buff:null,buffOn:false};
+let S={stage:1,high:1,gold:100,wave:1,maxW:3,lives:20,phase:'prep',towers:[],mobs:[],path:[],segs:[],plen:0,building:-1};
+let prepared={policy:[],active:[]};
+let quizTarget='policy';
 
 function setPath(n){
   const src=PATHS[Math.min(n-1,PATHS.length-1)];
-  S.path=src.map(p=>({x:p.x,y:p.y}));
-  S.segs=[]; S.plen=0;
+  S.path=src.map(p=>({...p})); S.segs=[]; S.plen=0;
   for(let i=0;i<S.path.length-1;i++){
     const a=S.path[i],b=S.path[i+1],len=Math.hypot(b.x-a.x,b.y-a.y);
     S.segs.push({a,b,len}); S.plen+=len;
   }
 }
 function posAt(d){
-  for(const s of S.segs){ if(d<=s.len){const t=d/s.len; return {x:s.a.x+(s.b.x-s.a.x)*t,y:s.a.y+(s.b.y-s.a.y)*t};} d-=s.len; }
+  for(const s of S.segs){if(d<=s.len){const t=d/s.len;return{x:s.a.x+(s.b.x-s.a.x)*t,y:s.a.y+(s.b.y-s.a.y)*t};}d-=s.len;}
   return S.path.at(-1)||{x:0,y:0};
 }
 function fresh(n){
-  S.stage=n; S.gold=70+n*40; S.wave=1; S.maxW=3; S.lives=20;
-  S.phase='prep'; S.towers=[]; S.mobs=[]; S.building=-1; S.buff=null;
-  setPath(n);
+  S.stage=n; S.gold=60+n*45; S.wave=1; S.maxW=3; S.lives=20;
+  S.phase='prep'; S.towers=[]; S.mobs=[]; S.building=-1; setPath(n);
+  // apply policy gold
+  if(prepared.policy.includes('Gold+')) S.gold+=50;
 }
 function ui(){
   document.getElementById('st').textContent=S.stage;
@@ -118,21 +127,74 @@ function ui(){
   document.getElementById('mw').textContent=S.maxW;
   document.getElementById('lv').textContent=S.lives;
   document.getElementById('go').disabled=S.phase!=='prep';
-  const showQ=S.buffOn||S.high>=3;
-  document.getElementById('qbtn').style.display=showQ?'inline-block':'none';
-  document.getElementById('qhome').style.display=showQ?'inline-block':'none';
-  document.getElementById('buffs').innerHTML=S.buff?`<span class="bufftag">${S.buff}</span>`:'';
+  const on=S.high>=3;
+  document.getElementById('prepBtn').style.display=on?'inline-block':'none';
+  document.getElementById('homeBuff').innerHTML=on?`Policy: ${prepared.policy.length}/3 | Aktif: ${prepared.active.length}/3`:'';
+  // active skills bar
+  const bar=document.getElementById('activeBar');
+  bar.innerHTML=prepared.active.map((a,i)=>`<button onclick="useActive(${i})" ${S.phase!=='wave'?'disabled':''}>${a}</button>`).join('')||'';
 }
 function msg(t){document.getElementById('msg').textContent=t}
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active'); if(id==='home'||id==='play')ui();}
+
+function openPrep(){
+  renderSlots();
+  show('prep');
+}
+function renderSlots(){
+  document.getElementById('polSlots').innerHTML=prepared.policy.map(p=>`<span class="card policy">${p}</span>`).join('')||'<span class="card">kosong</span>';
+  document.getElementById('actSlots').innerHTML=prepared.active.map(a=>`<span class="card on">${a}</span>`).join('')||'<span class="card">kosong</span>';
+}
+function clearBuffs(){ prepared={policy:[],active:[]}; renderSlots(); ui(); }
+
+function doQuiz(target){
+  if(target==='policy' && prepared.policy.length>=3){alert('Policy sudah 3');return;}
+  if(target==='active' && prepared.active.length>=3){alert('Aktif sudah 3');return;}
+  quizTarget=target;
+  const q=QS[Math.floor(Math.random()*QS.length)];
+  document.getElementById('qq').textContent=q.q;
+  const box=document.getElementById('qopts'); box.innerHTML='';
+  document.getElementById('qres').textContent='';
+  q.o.forEach((t,i)=>{
+    const b=document.createElement('button');
+    b.textContent=t; b.style.display='block'; b.style.width='90%'; b.style.margin='6px auto';
+    b.onclick=()=>{
+      if(i===q.a){
+        const pool=target==='policy'?POLICY:ACTIVE;
+        const pick=pool[Math.floor(Math.random()*pool.length)];
+        if(target==='policy') prepared.policy.push(pick);
+        else prepared.active.push(pick);
+        document.getElementById('qres').innerHTML=`<span style="color:#4CAF50">Benar! Dapat: ${pick}</span>`;
+      }else{
+        document.getElementById('qres').innerHTML='<span style="color:#e74c3c">Salah</span>';
+      }
+      setTimeout(()=>{renderSlots();show('prep');},800);
+    };
+    box.appendChild(b);
+  });
+  show('quiz');
+}
+
+function useActive(i){
+  if(S.phase!=='wave')return;
+  const name=prepared.active[i];
+  if(!name)return;
+  if(name==='Burst Damage'){ S.mobs.forEach(m=>m.hp-=30); }
+  if(name==='Heal Lives'){ S.lives=Math.min(30,S.lives+5); }
+  if(name==='Extra Gold'){ S.gold+=60; }
+  if(name==='Knockback'){ S.mobs.forEach(m=>m.dist=Math.max(0,m.dist-80)); }
+  prepared.active.splice(i,1);
+  msg('Pakai: '+name);
+  ui();
+}
 
 function beginStage(){ fresh(S.high); show('play'); ui(); msg('Stage '+S.stage); }
-function goHome(){ S.towers=[]; S.mobs=[]; S.phase='prep'; document.getElementById('ns').textContent=S.high; show('home'); }
-function pick(i){ if(S.phase!=='prep')return; if(S.gold<TYPES[i].c){msg('Gold kurang');return;} S.building=i; msg('Klik peta'); }
+function goHome(){ S.towers=[];S.mobs=[];S.phase='prep'; document.getElementById('ns').textContent=S.high; show('home'); }
+function pick(i){ if(S.phase!=='prep')return; if(S.gold<TYPES[i].c){msg('Kurang');return;} S.building=i; msg('Klik peta'); }
 function launch(){
   if(S.phase!=='prep')return;
   S.phase='wave'; S.building=-1; S.mobs=[];
-  for(let i=0;i<5+S.stage;i++) S.mobs.push({dist:-i*22,spd:1.6,hp:8+S.stage*5});
+  for(let i=0;i<5+S.stage;i++) S.mobs.push({dist:-i*20,spd:1.55,hp:10+S.stage*4});
   msg('Wave '+S.wave); ui();
 }
 
@@ -142,95 +204,63 @@ cvs.onclick=e=>{
   const rc=cvs.getBoundingClientRect();
   const x=(e.clientX-rc.left)*(cvs.width/rc.width);
   const y=(e.clientY-rc.top)*(cvs.height/rc.height);
-  let r=t.r; if(S.buff==='Range+') r+=30;
+  let r=t.r+(prepared.policy.includes('Range+25')?25:0);
   S.towers.push({x,y,r,d:t.d,col:t.col});
-  S.gold-=t.c; S.building=-1; msg('Tower masuk'); ui();
+  S.gold-=t.c; S.building=-1; msg('Dibangun'); ui();
 };
 
 function draw(){
   ctx.clearRect(0,0,cvs.width,cvs.height);
   if(!S.path.length)return;
   ctx.lineCap='round';ctx.lineJoin='round';
-  ctx.strokeStyle='#16324a';ctx.lineWidth=42;
+  ctx.strokeStyle='#152a40';ctx.lineWidth=40;
   ctx.beginPath();ctx.moveTo(S.path[0].x,S.path[0].y);
   for(let i=1;i<S.path.length;i++)ctx.lineTo(S.path[i].x,S.path[i].y);
-  ctx.stroke(); ctx.strokeStyle='#e0b15c';ctx.lineWidth=28;ctx.stroke();
+  ctx.stroke();ctx.strokeStyle='#e0b15c';ctx.lineWidth=26;ctx.stroke();
   for(const t of S.towers){
-    ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,6.3);ctx.fillStyle='rgba(255,255,255,.05)';ctx.fill();
-    ctx.fillStyle=t.col;ctx.beginPath();ctx.arc(t.x,t.y,15,0,6.3);ctx.fill();
+    ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,6.28);ctx.fillStyle='rgba(255,255,255,.04)';ctx.fill();
+    ctx.fillStyle=t.col;ctx.beginPath();ctx.arc(t.x,t.y,14,0,6.28);ctx.fill();
     ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
   }
   for(const m of S.mobs){
     if(m.dist<0)continue;
     const p=posAt(m.dist);
-    ctx.fillStyle='#ef5350';ctx.beginPath();ctx.arc(p.x,p.y,11,0,6.3);ctx.fill();
+    ctx.fillStyle='#e53935';ctx.beginPath();ctx.arc(p.x,p.y,10,0,6.28);ctx.fill();
   }
 }
 
 function tick(){
   if(S.phase==='wave'){
-    const slow=S.buff==='Slow'?0.7:1;
+    const slow=prepared.policy.includes('Slow 20%')?0.8:1;
+    const dmgM=prepared.policy.includes('Damage+15%')?1.15:1;
     for(let i=S.mobs.length-1;i>=0;i--){
       const m=S.mobs[i];
       m.dist+=m.spd*slow;
       if(m.dist>=S.plen){
         S.lives--; S.mobs.splice(i,1); ui();
-        if(S.lives<=0){ S.phase='prep'; msg('Gagal'); setTimeout(goHome,700); }
+        if(S.lives<=0){S.phase='prep';msg('Gagal');setTimeout(goHome,600);}
         continue;
       }
       const p=posAt(Math.max(0,m.dist));
-      const dmgMul=S.buff==='Damage+'?1.35:1;
       for(const t of S.towers){
         if(Math.hypot(t.x-p.x,t.y-p.y)<t.r){
-          m.hp-=t.d*0.045*dmgMul;
-          if(m.hp<=0){ S.gold+=4; S.mobs.splice(i,1); ui(); break; }
+          m.hp-=t.d*0.04*dmgM;
+          if(m.hp<=0){S.gold+=5;S.mobs.splice(i,1);ui();break;}
         }
       }
     }
-    if(S.mobs.length===0 && S.phase==='wave'){
+    if(S.mobs.length===0&&S.phase==='wave'){
       if(S.wave>=S.maxW){
-        if(S.stage>=S.high) S.high=S.stage+1;
-        if(S.high>=3) S.buffOn=true;
-        S.towers=[]; S.mobs=[]; S.phase='prep';
+        if(S.stage>=S.high)S.high=S.stage+1;
+        S.towers=[];S.mobs=[];S.phase='prep';
         document.getElementById('dmsg').textContent='Stage '+S.stage+' selesai';
         show('done');
-      }else{
-        S.wave++; S.phase='prep'; msg('Wave selesai'); ui();
-      }
+      }else{ S.wave++; S.phase='prep'; msg('Lanjut'); ui(); }
     }
   }
   draw();
   requestAnimationFrame(tick);
 }
-
-function openQuiz(){
-  if(!S.buffOn && S.high<3){ alert('Buff terbuka setelah Stage 3'); return; }
-  S.buffOn=true;
-  const q=QS[Math.floor(Math.random()*QS.length)];
-  document.getElementById('qq').textContent=q.q;
-  const box=document.getElementById('qopts'); box.innerHTML='';
-  document.getElementById('qres').textContent='';
-  q.o.forEach((t,i)=>{
-    const b=document.createElement('button');
-    b.textContent=t; b.style.display='block'; b.style.width='100%'; b.style.margin='6px 0';
-    b.onclick=()=>{
-      if(i===q.a){
-        document.getElementById('qres').innerHTML='<span style="color:#4CAF50">Benar! '+q.buff+'</span>';
-        S.buff=q.buff;
-        if(q.buff==='Gold+40') S.gold+=40;
-      }else{
-        document.getElementById('qres').innerHTML='<span style="color:#e74c3c">Salah</span>';
-        S.buff=null;
-      }
-      ui();
-      setTimeout(closeQuiz,900);
-    };
-    box.appendChild(b);
-  });
-  show('quiz');
-}
-function openQuizHome(){ openQuiz(); }
-function closeQuiz(){ show('play'); ui(); }
 
 setPath(1); ui(); tick();
 </script>
