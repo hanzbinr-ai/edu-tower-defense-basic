@@ -2,88 +2,160 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edu TD - Basic Mechanics</title>
     <style>
-        body { margin: 0; background: #1a1a2e; color: white; font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; }
-        canvas { border: 2px solid #e0b15c; background: #16213e; margin-top: 20px; }
-        #ui { margin: 10px; text-align: center; }
-        button { padding: 10px 20px; margin: 5px; background: #c83b2e; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        button:hover { background: #a02d22; }
+        body { margin: 0; background: #1a1a2e; color: #f0e6d0; font-family: 'Segoe UI', Arial, sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        h1 { margin: 15px 0 5px; font-size: 24px; color: #e0b15c; }
+        canvas { border: 3px solid #e0b15c; background: #0f3460; border-radius: 8px; margin: 10px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        #ui { background: #16213e; padding: 12px 20px; border-radius: 10px; margin: 10px; text-align: center; border: 1px solid #e0b15c; }
+        .stats { font-size: 18px; margin-bottom: 8px; }
+        .stats span { color: #e0b15c; font-weight: bold; }
+        button { padding: 10px 18px; margin: 5px; background: #c83b2e; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 15px; transition: 0.2s; }
+        button:hover { background: #a83228; transform: translateY(-1px); }
+        button:disabled { background: #555; cursor: not-allowed; transform: none; }
+        #message { margin-top: 8px; min-height: 20px; color: #e0b15c; font-size: 14px; }
     </style>
 </head>
 <body>
-    <h1>Edu Tower Defense - Basic Prototype</h1>
+    <h1>Edu Tower Defense</h1>
     <div id="ui">
-        <div>Gold: <span id="gold">100</span> | Wave: <span id="wave">1</span> | Lives: <span id="lives">20</span></div>
-        <div>Phase: <span id="phase">Prep</span></div>
-        <button onclick="startWave()">Start Wave</button>
-        <button onclick="buildTower()">Build Tower (50 gold)</button>
-        <p>Klik di canvas untuk menempatkan tower (saat Prep phase)</p>
+        <div class="stats">
+            Gold: <span id="gold">150</span> &nbsp;|&nbsp;
+            Wave: <span id="wave">1</span> &nbsp;|&nbsp;
+            Lives: <span id="lives">20</span> &nbsp;|&nbsp;
+            Phase: <span id="phase">Prep</span>
+        </div>
+        <button id="btnStart" onclick="startWave()">Mulai Wave</button>
+        <button id="btnBuild" onclick="toggleBuild()">Bangun Tower (50)</button>
+        <div id="message">Fase Persiapan - Tempatkan tower sebelum memulai wave</div>
     </div>
-    <canvas id="gameCanvas" width="800" height="500"></canvas>
+    <canvas id="gameCanvas" width="900" height="520"></canvas>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        let gold = 100;
+        let gold = 150;
         let wave = 1;
         let lives = 20;
-        let phase = 'prep'; // prep, wave, resolve
+        let phase = 'prep';
         let towers = [];
         let monsters = [];
-        let path = [
-            {x: 0, y: 250},
-            {x: 200, y: 250},
-            {x: 200, y: 100},
-            {x: 500, y: 100},
-            {x: 500, y: 400},
-            {x: 800, y: 400}
+        let buildMode = false;
+
+        // Path points (lebih jelas dan panjang)
+        const path = [
+            {x: -20, y: 260},
+            {x: 180, y: 260},
+            {x: 180, y: 120},
+            {x: 420, y: 120},
+            {x: 420, y: 380},
+            {x: 680, y: 380},
+            {x: 680, y: 200},
+            {x: 920, y: 200}
         ];
-        let selectedBuild = false;
+
+        // Hitung total panjang path untuk progress
+        let pathSegments = [];
+        let totalPathLength = 0;
+        for (let i = 0; i < path.length - 1; i++) {
+            let dx = path[i+1].x - path[i].x;
+            let dy = path[i+1].y - path[i].y;
+            let len = Math.sqrt(dx*dx + dy*dy);
+            pathSegments.push({start: path[i], end: path[i+1], length: len});
+            totalPathLength += len;
+        }
+
+        function getPositionOnPath(progress) {
+            let remaining = progress;
+            for (let seg of pathSegments) {
+                if (remaining <= seg.length) {
+                    let t = remaining / seg.length;
+                    return {
+                        x: seg.start.x + (seg.end.x - seg.start.x) * t,
+                        y: seg.start.y + (seg.end.y - seg.start.y) * t
+                    };
+                }
+                remaining -= seg.length;
+            }
+            return path[path.length - 1];
+        }
 
         function updateUI() {
             document.getElementById('gold').textContent = gold;
             document.getElementById('wave').textContent = wave;
             document.getElementById('lives').textContent = lives;
-            document.getElementById('phase').textContent = phase;
+            document.getElementById('phase').textContent = phase === 'prep' ? 'Persiapan' : phase === 'wave' ? 'Wave Berjalan' : 'Selesai';
+            document.getElementById('btnStart').disabled = phase !== 'prep';
+            document.getElementById('btnBuild').disabled = phase !== 'prep' || gold < 50;
+            document.getElementById('btnBuild').textContent = buildMode ? 'Batal Bangun' : 'Bangun Tower (50)';
+        }
+
+        function setMessage(text) {
+            document.getElementById('message').textContent = text;
         }
 
         function drawPath() {
-            ctx.strokeStyle = '#e0b15c';
-            ctx.lineWidth = 40;
+            // Background path
+            ctx.strokeStyle = '#3a506b';
+            ctx.lineWidth = 50;
             ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
             ctx.beginPath();
             ctx.moveTo(path[0].x, path[0].y);
-            for (let i = 1; i < path.length; i++) {
-                ctx.lineTo(path[i].x, path[i].y);
-            }
+            for (let i = 1; i < path.length; i++) ctx.lineTo(path[i].x, path[i].y);
+            ctx.stroke();
+
+            // Inner path
+            ctx.strokeStyle = '#e0b15c';
+            ctx.lineWidth = 36;
             ctx.stroke();
         }
 
         function drawTowers() {
             towers.forEach(tower => {
+                // Range
+                ctx.beginPath();
+                ctx.arc(tower.x, tower.y, tower.range, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(76, 175, 80, 0.12)';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(76, 175, 80, 0.4)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                // Tower body
+                ctx.fillStyle = '#2e7d32';
+                ctx.beginPath();
+                ctx.arc(tower.x, tower.y, 22, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#a5d6a7';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Tower top
                 ctx.fillStyle = '#4CAF50';
                 ctx.beginPath();
-                ctx.arc(tower.x, tower.y, 20, 0, Math.PI * 2);
+                ctx.arc(tower.x, tower.y - 8, 12, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                // Range
-                ctx.strokeStyle = 'rgba(76, 175, 80, 0.3)';
-                ctx.beginPath();
-                ctx.arc(tower.x, tower.y, 100, 0, Math.PI * 2);
-                ctx.stroke();
             });
         }
 
         function drawMonsters() {
             monsters.forEach(m => {
-                ctx.fillStyle = '#c83b2e';
+                ctx.fillStyle = m.hp > 15 ? '#c83b2e' : '#ff6b6b';
                 ctx.beginPath();
-                ctx.arc(m.x, m.y, 15, 0, Math.PI * 2);
+                ctx.arc(m.x, m.y, 16, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // HP bar
+                ctx.fillStyle = '#333';
+                ctx.fillRect(m.x - 18, m.y - 28, 36, 5);
+                ctx.fillStyle = '#4CAF50';
+                ctx.fillRect(m.x - 18, m.y - 28, 36 * (m.hp / m.maxHp), 5);
             });
         }
 
@@ -94,51 +166,54 @@
             drawMonsters();
 
             if (phase === 'wave') {
-                // Simple monster movement
-                monsters.forEach((m, index) => {
-                    // Very basic path following (simplified)
-                    m.progress += 0.5;
-                    // Approximate position along path (simplified for prototype)
-                    let totalLength = 1200; // rough
-                    let t = m.progress / totalLength;
-                    if (t >= 1) {
+                for (let i = monsters.length - 1; i >= 0; i--) {
+                    let m = monsters[i];
+                    m.progress += m.speed;
+
+                    if (m.progress >= totalPathLength) {
                         lives--;
-                        monsters.splice(index, 1);
+                        monsters.splice(i, 1);
                         updateUI();
                         if (lives <= 0) {
-                            alert('Game Over!');
+                            setMessage('Game Over! Refresh halaman untuk mulai lagi.');
                             phase = 'prep';
+                            updateUI();
+                            return;
                         }
-                    } else {
-                        // Simple interpolation for demo
-                        m.x = 50 + m.progress * 0.6;
-                        m.y = 250 + Math.sin(m.progress * 0.01) * 50;
+                        continue;
                     }
-                });
 
-                // Tower shooting (very basic)
-                towers.forEach(tower => {
-                    monsters.forEach((m, mi) => {
+                    let pos = getPositionOnPath(m.progress);
+                    m.x = pos.x;
+                    m.y = pos.y;
+
+                    // Tower attack
+                    towers.forEach(tower => {
                         let dx = tower.x - m.x;
                         let dy = tower.y - m.y;
                         let dist = Math.sqrt(dx*dx + dy*dy);
-                        if (dist < 100) {
-                            m.hp -= 1;
+                        if (dist <= tower.range) {
+                            m.hp -= tower.damage * 0.016; // per frame approx
                             if (m.hp <= 0) {
-                                gold += 10;
-                                monsters.splice(mi, 1);
+                                gold += 12;
+                                monsters.splice(i, 1);
                                 updateUI();
                             }
                         }
                     });
-                });
+                }
 
-                if (monsters.length === 0 && phase === 'wave') {
+                if (monsters.length === 0) {
                     phase = 'resolve';
-                    gold += 50;
+                    gold += 40 + wave * 5;
                     wave++;
+                    setMessage(`Wave ${wave-1} selesai! +${40 + (wave-1)*5} gold`);
                     updateUI();
-                    setTimeout(() => { phase = 'prep'; updateUI(); }, 2000);
+                    setTimeout(() => {
+                        phase = 'prep';
+                        setMessage('Fase Persiapan - Siapkan pertahanan');
+                        updateUI();
+                    }, 1800);
                 }
             }
 
@@ -148,39 +223,52 @@
         function startWave() {
             if (phase !== 'prep') return;
             phase = 'wave';
-            // Spawn monsters
-            for (let i = 0; i < 5 + wave; i++) {
+            buildMode = false;
+            setMessage('Wave dimulai!');
+            updateUI();
+
+            let count = 6 + wave * 2;
+            for (let i = 0; i < count; i++) {
                 monsters.push({
-                    x: 0,
-                    y: 250,
-                    progress: i * -30,
-                    hp: 10 + wave * 2
+                    progress: -i * 40,
+                    speed: 1.2 + wave * 0.15,
+                    hp: 20 + wave * 8,
+                    maxHp: 20 + wave * 8,
+                    x: path[0].x,
+                    y: path[0].y
                 });
             }
-            updateUI();
         }
 
-        function buildTower() {
-            if (gold >= 50 && phase === 'prep') {
-                selectedBuild = true;
-                alert('Klik di canvas untuk menempatkan tower');
-            } else {
-                alert('Gold tidak cukup atau bukan fase Prep');
-            }
+        function toggleBuild() {
+            if (phase !== 'prep' || gold < 50) return;
+            buildMode = !buildMode;
+            setMessage(buildMode ? 'Klik di peta untuk menempatkan tower' : 'Mode bangun dibatalkan');
+            updateUI();
         }
 
         canvas.addEventListener('click', (e) => {
-            if (!selectedBuild || phase !== 'prep') return;
+            if (!buildMode || phase !== 'prep' || gold < 50) return;
             const rect = canvas.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            towers.push({x, y});
+
+            // Jangan taruh terlalu dekat path (opsional sederhana)
+            towers.push({
+                x: x,
+                y: y,
+                range: 110,
+                damage: 8
+            });
             gold -= 50;
-            selectedBuild = false;
+            buildMode = false;
+            setMessage('Tower berhasil dibangun');
             updateUI();
         });
 
+        // Init
         updateUI();
+        setMessage('Fase Persiapan - Tempatkan tower lalu mulai wave');
         gameLoop();
     </script>
 </body>
