@@ -14,20 +14,19 @@
         #homeScreen { justify-content: center; text-align: center; background: linear-gradient(180deg, #1a1a2e 0%, #0f3460 100%); }
         #homeScreen h1 { font-size: 48px; color: #e0b15c; margin-bottom: 10px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         #homeScreen p { font-size: 18px; margin-bottom: 30px; opacity: 0.9; }
-        .home-towers { margin: 30px 0; height: 120px; position: relative; }
+        .home-towers { margin: 30px 0; height: 120px; position: relative; width: 300px; }
         .mini-tower { position: absolute; width: 40px; height: 50px; background: #2e7d32; border-radius: 8px 8px 4px 4px; border: 3px solid #a5d6a7; }
-        .mini-tower:nth-child(1) { left: 30%; animation: float 3s ease-in-out infinite; }
-        .mini-tower:nth-child(2) { left: 50%; animation: float 3s ease-in-out infinite 0.5s; }
+        .mini-tower:nth-child(1) { left: 20%; animation: float 3s ease-in-out infinite; }
+        .mini-tower:nth-child(2) { left: 45%; animation: float 3s ease-in-out infinite 0.5s; }
         .mini-tower:nth-child(3) { left: 70%; animation: float 3s ease-in-out infinite 1s; }
         @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 
-        /* BUTTONS */
         button { padding: 14px 28px; margin: 8px; background: #c83b2e; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 18px; transition: 0.2s; }
         button:hover { background: #a83228; transform: translateY(-2px); }
         button.secondary { background: transparent; border: 2px solid #e0b15c; color: #e0b15c; }
         button.secondary:hover { background: #e0b15c; color: #1a1a2e; }
 
-        /* GAME HUD */
+        /* GAME */
         #gameScreen { padding: 10px; }
         .hud-top { width: 100%; max-width: 960px; background: #16213e; border: 2px solid #e0b15c; border-radius: 12px; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .hud-stats { display: flex; gap: 25px; font-size: 16px; }
@@ -39,18 +38,20 @@
         #buffPanel.active, #buildPanel.active { display: block; }
         .buff-card { display: inline-block; background: #0f3460; border: 2px solid #4CAF50; border-radius: 8px; padding: 10px 16px; margin: 5px; }
 
+        /* COMPLETE SCREEN */
+        #completeScreen { justify-content: center; text-align: center; }
+        #completeScreen h1 { font-size: 42px; color: #e0b15c; margin-bottom: 15px; }
+        #completeScreen p { font-size: 20px; margin-bottom: 25px; }
+
         /* QUIZ */
         #quizScreen { justify-content: center; }
         .quiz-box { background: #16213e; border: 2px solid #e0b15c; border-radius: 16px; padding: 30px; max-width: 500px; width: 100%; text-align: center; }
         .question { font-size: 22px; margin: 20px 0 30px; line-height: 1.4; }
         .options button { display: block; width: 100%; margin: 10px 0; background: #0f3460; border: 1px solid #e0b15c; }
-        .options button:hover { background: #1a4a7a; }
-        #quizResult { margin-top: 15px; font-size: 18px; min-height: 28px; }
     </style>
 </head>
 <body>
 
-<!-- HOME SCREEN -->
 <div id="homeScreen" class="screen active">
     <h1>Edu Tower Defense</h1>
     <p>Belajar sambil bertahan</p>
@@ -59,18 +60,17 @@
         <div class="mini-tower"></div>
         <div class="mini-tower"></div>
     </div>
-    <button onclick="startGame()">Mulai Bermain</button>
+    <button onclick="startGame()">Mulai Stage <span id="nextStage">1</span></button>
     <button class="secondary" onclick="openQuizFromHome()">Jawab Soal (Buff)</button>
-    <p style="margin-top:30px; font-size:14px; opacity:0.7;">Stage 1-2: Belajar dasar &nbsp;|&nbsp; Stage 3+: Buff terbuka</p>
+    <p style="margin-top:30px; font-size:14px; opacity:0.7;">Selesaikan stage untuk membuka stage berikutnya</p>
 </div>
 
-<!-- GAME SCREEN -->
 <div id="gameScreen" class="screen">
     <div class="hud-top">
         <div class="hud-stats">
             <div>Stage <span id="stage">1</span></div>
             <div>Gold <span id="gold">150</span></div>
-            <div>Wave <span id="wave">1</span></div>
+            <div>Wave <span id="wave">1</span>/<span id="maxWave">3</span></div>
             <div>Lives <span id="lives">20</span></div>
         </div>
         <div class="hud-tabs">
@@ -79,22 +79,24 @@
             <button class="secondary" onclick="goHome()">Home</button>
         </div>
     </div>
-
     <canvas id="gameCanvas" width="900" height="500"></canvas>
-
-    <div id="buildPanel">
+    <div id="buildPanel" class="active">
         <button id="btnBuild" onclick="toggleBuild()">Bangun Tower (50 Gold)</button>
         <button id="btnStart" onclick="startWave()">Mulai Wave</button>
         <div id="message" style="margin-top:8px; color:#e0b15c;">Fase Persiapan</div>
     </div>
-
     <div id="buffPanel">
         <div id="buffDisplay">Belum ada buff</div>
         <button onclick="openQuiz()" id="btnQuiz" style="display:none;">Jawab Soal Baru</button>
     </div>
 </div>
 
-<!-- QUIZ SCREEN -->
+<div id="completeScreen" class="screen">
+    <h1>Stage Selesai!</h1>
+    <p id="completeText">Kamu berhasil menyelesaikan Stage ini.</p>
+    <button onclick="goHome()">Kembali ke Home</button>
+</div>
+
 <div id="quizScreen" class="screen">
     <div class="quiz-box">
         <h2 style="color:#e0b15c;">Soal Buff</h2>
@@ -109,10 +111,10 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-let stage = 1, gold = 150, wave = 1, lives = 20;
+let stage = 1, gold = 150, wave = 1, lives = 20, maxWave = 3;
 let phase = 'prep', towers = [], monsters = [], buildMode = false;
 let buffUnlocked = false, activeBuffs = [];
-let currentTab = 'build';
+let highestStage = 1;
 
 const path = [{x:-20,y:250},{x:150,y:250},{x:150,y:120},{x:380,y:120},{x:380,y:360},{x:620,y:360},{x:620,y:180},{x:920,y:180}];
 let pathSegments = [], totalPathLength = 0;
@@ -145,11 +147,29 @@ function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
 }
-function startGame() { showScreen('gameScreen'); updateUI(); }
-function goHome() { showScreen('homeScreen'); }
+
+function startGame() {
+    // Reset for new stage run
+    gold = 120 + stage * 20;
+    lives = 18 + stage;
+    wave = 1;
+    maxWave = 2 + Math.min(stage, 4);
+    towers = [];
+    monsters = [];
+    phase = 'prep';
+    buildMode = false;
+    showScreen('gameScreen');
+    showTab('build');
+    updateUI();
+    setMessage('Fase Persiapan - Stage ' + stage);
+}
+
+function goHome() {
+    document.getElementById('nextStage').textContent = highestStage;
+    showScreen('homeScreen');
+}
 
 function showTab(tab) {
-    currentTab = tab;
     document.getElementById('buildPanel').classList.toggle('active', tab==='build');
     document.getElementById('buffPanel').classList.toggle('active', tab==='buff');
 }
@@ -158,31 +178,35 @@ function updateUI() {
     document.getElementById('stage').textContent = stage;
     document.getElementById('gold').textContent = gold;
     document.getElementById('wave').textContent = wave;
+    document.getElementById('maxWave').textContent = maxWave;
     document.getElementById('lives').textContent = lives;
     document.getElementById('btnStart').disabled = phase !== 'prep';
     document.getElementById('btnBuild').disabled = phase !== 'prep' || gold < 50;
-    document.getElementById('tabBuff').style.opacity = buffUnlocked ? 1 : 0.4;
+    document.getElementById('tabBuff').style.opacity = buffUnlocked ? 1 : 0.5;
     document.getElementById('btnQuiz').style.display = buffUnlocked ? 'inline-block' : 'none';
 
     const bd = document.getElementById('buffDisplay');
     bd.innerHTML = activeBuffs.length 
         ? activeBuffs.map(b => `<div class="buff-card">${b.name}</div>`).join('')
-        : (buffUnlocked ? 'Belum ada buff aktif' : 'Buff terbuka di Stage 3');
+        : (buffUnlocked ? 'Belum ada buff aktif' : 'Buff terbuka setelah Stage 3');
 }
 
 function setMessage(t) { document.getElementById('message').textContent = t; }
 
-// QUIZ
 function openQuiz() {
-    if (!buffUnlocked) { alert('Buff terbuka setelah menyelesaikan Stage 3'); return; }
+    if (!buffUnlocked) return;
     loadQuestion();
     showScreen('quizScreen');
 }
 function openQuizFromHome() {
-    if (stage < 3) { alert('Selesaikan sampai Stage 3 dulu untuk membuka Buff'); return; }
+    if (highestStage < 3) { alert('Selesaikan Stage 3 terlebih dahulu'); return; }
+    buffUnlocked = true;
     openQuiz();
 }
-function closeQuiz() { showScreen(document.getElementById('gameScreen').classList.contains('active') || stage>=1 ? 'gameScreen' : 'homeScreen'); updateUI(); }
+function closeQuiz() {
+    showScreen('gameScreen');
+    updateUI();
+}
 
 let qIndex = 0, answered = false;
 function loadQuestion() {
@@ -206,28 +230,25 @@ function selectAnswer(i) {
     const q = questions[qIndex];
     const res = document.getElementById('quizResult');
     if (i === q.ans) {
-        res.innerHTML = '<span style="color:#4CAF50">Benar! Buff aktif.</span>';
+        res.innerHTML = '<span style="color:#4CAF50">Benar! Buff didapatkan.</span>';
         activeBuffs = [q.buff];
         if (q.buff.type==='gold') gold += q.buff.val;
         if (q.buff.type==='life') lives += q.buff.val;
     } else {
-        res.innerHTML = '<span style="color:#e74c3c">Salah. Tidak dapat buff.</span>';
+        res.innerHTML = '<span style="color:#e74c3c">Salah.</span>';
         activeBuffs = [];
     }
-    setTimeout(() => { closeQuiz(); }, 1400);
+    setTimeout(closeQuiz, 1300);
 }
 
-// DRAW
 function draw() {
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    // path
     ctx.lineCap='round'; ctx.lineJoin='round';
     ctx.strokeStyle='#1e3a5f'; ctx.lineWidth=50;
     ctx.beginPath(); ctx.moveTo(path[0].x,path[0].y);
     path.slice(1).forEach(p=>ctx.lineTo(p.x,p.y)); ctx.stroke();
     ctx.strokeStyle='#e0b15c'; ctx.lineWidth=34; ctx.stroke();
 
-    // towers
     towers.forEach(t => {
         ctx.beginPath(); ctx.arc(t.x,t.y,t.range,0,Math.PI*2);
         ctx.fillStyle='rgba(76,175,80,0.08)'; ctx.fill();
@@ -236,7 +257,6 @@ function draw() {
         ctx.fillStyle='#4CAF50'; ctx.fillRect(t.x-5,t.y-30,10,18);
     });
 
-    // monsters
     monsters.forEach(m => {
         ctx.fillStyle='#e74c3c'; ctx.beginPath(); ctx.arc(m.x,m.y,16,0,Math.PI*2); ctx.fill();
         ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
@@ -254,7 +274,12 @@ function loop() {
             m.progress += spd;
             if (m.progress >= totalPathLength) {
                 lives--; monsters.splice(i,1); updateUI();
-                if (lives<=0) { setMessage('Game Over'); phase='prep'; updateUI(); return; }
+                if (lives<=0) { 
+                    setMessage('Gagal! Kembali ke Home');
+                    setTimeout(goHome, 1500);
+                    phase='prep'; 
+                    return; 
+                }
                 continue;
             }
             let pos = getPos(m.progress); m.x=pos.x; m.y=pos.y;
@@ -266,20 +291,23 @@ function loop() {
                 }
             });
         }
-        if (monsters.length===0) {
+        if (monsters.length===0 && phase==='wave') {
             phase='resolve';
-            gold += 45 + stage*8;
-            wave++;
-            if (wave>4) {
-                stage++; wave=1;
-                if (stage>=3 && !buffUnlocked) {
-                    buffUnlocked=true;
-                    setMessage('Stage 3! Buff System terbuka');
-                    showTab('buff');
-                } else setMessage('Stage naik!');
-            } else setMessage('Wave selesai');
-            updateUI();
-            setTimeout(()=>{ phase='prep'; setMessage('Persiapan'); updateUI(); },1600);
+            gold += 40 + stage*10;
+            if (wave >= maxWave) {
+                // Stage Clear
+                if (stage >= highestStage) highestStage = stage + 1;
+                if (stage >= 3) buffUnlocked = true;
+                document.getElementById('completeText').textContent = `Stage ${stage} berhasil diselesaikan!`;
+                showScreen('completeScreen');
+                stage = Math.min(stage + 1, 10);
+                return;
+            } else {
+                wave++;
+                setMessage('Wave selesai');
+                updateUI();
+                setTimeout(()=>{ phase='prep'; setMessage('Persiapan wave berikutnya'); updateUI(); }, 1400);
+            }
         }
     }
     requestAnimationFrame(loop);
@@ -287,28 +315,30 @@ function loop() {
 
 function startWave() {
     if (phase!=='prep') return;
-    phase='wave'; buildMode=false; setMessage('Wave berjalan...'); updateUI();
-    let n = 4 + stage*2 + wave;
+    phase='wave'; buildMode=false; setMessage('Wave ' + wave + ' dimulai'); updateUI();
+    let n = 5 + stage + wave;
     for (let i=0;i<n;i++) monsters.push({
-        progress: -i*45, speed:1.3+stage*0.15,
-        hp:22+stage*12, maxHp:22+stage*12, x:path[0].x, y:path[0].y
+        progress: -i*40, speed:1.25 + stage*0.12,
+        hp:20 + stage*10 + wave*4, maxHp:20 + stage*10 + wave*4,
+        x:path[0].x, y:path[0].y
     });
 }
+
 function toggleBuild() {
     if (phase!=='prep'||gold<50) return;
     buildMode=!buildMode;
-    setMessage(buildMode?'Klik peta untuk taruh tower':'Batal');
+    setMessage(buildMode ? 'Klik di peta untuk menaruh tower' : 'Batal');
     updateUI();
 }
+
 canvas.onclick = e => {
     if (!buildMode || phase!=='prep' || gold<50) return;
     const r = canvas.getBoundingClientRect();
-    let range = 115 + (activeBuffs.some(b=>b.type==='range')?40:0);
-    towers.push({x:e.clientX-r.left, y:e.clientY-r.top, range, damage:9});
-    gold-=50; buildMode=false; setMessage('Tower siap'); updateUI();
+    let range = 110 + (activeBuffs.some(b=>b.type==='range')?35:0);
+    towers.push({x:e.clientX-r.left, y:e.clientY-r.top, range, damage:8 + stage});
+    gold-=50; buildMode=false; setMessage('Tower dibangun'); updateUI();
 };
 
-// init
 showTab('build');
 updateUI();
 loop();
